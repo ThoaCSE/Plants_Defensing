@@ -1,6 +1,8 @@
 package plantsdefense;
 
+import plantsdefense.gui.EditorPanel;
 import plantsdefense.util.Constants;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -10,7 +12,7 @@ public class GameFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        add(new GamePanel());
+        add(new EditorPanel());
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
