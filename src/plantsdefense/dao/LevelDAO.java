@@ -27,6 +27,7 @@ public class LevelDAO {
 
     public Tile[][] loadLevel(String filename){
         Tile[][] grid = new Tile[Constants.rows][Constants.cols];
+
         try(BufferedReader reader = new BufferedReader(new FileReader(Level_path + filename))){
             String line;
             int row = 0;
@@ -40,6 +41,11 @@ public class LevelDAO {
                     grid[row][col] = new Tile(col, row, Constants.tile_grass);
                 }
                 row ++;
+            }
+            for( ;row < Constants.rows; row++){
+                for(int col = 0; col< Constants.cols; col++){
+                    grid[row][col] = new Tile(col, row, Constants.tile_grass);
+                }
             }
         } catch (IOException | NumberFormatException e){
             System.err.println("Loading error!!! Using Default: " + e.getMessage());
