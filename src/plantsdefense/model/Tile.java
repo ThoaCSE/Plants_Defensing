@@ -30,7 +30,7 @@ public class Tile {
     public BufferedImage getSprite(){
         return switch (type){
             case Constants.tile_grass -> SpriteLoader.getSprite(9, 0);
-            case Constants.tile_path -> SpriteLoader.getSprite(7, 0);
+            case Constants.tile_path -> SpriteLoader.getSprite(8, 0);
             case Constants.tile_begin -> SpriteLoader.getSprite(7, 2);
             case Constants.tile_end -> SpriteLoader.getSprite(8, 2);
             default -> SpriteLoader.getSprite(0,0);
