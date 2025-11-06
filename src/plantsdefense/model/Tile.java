@@ -6,25 +6,24 @@ import plantsdefense.util.SpriteLoader;
 import java.awt.image.BufferedImage;
 
 public class Tile {
-    private final int x,y;
-    private final int type;
+    private final int gridX, gridY;
+    private int type;
 
     public Tile(int gridX, int gridY, int type){
-        this.x = gridX * Constants.tile_size;
-        this.y = gridY * Constants.tile_size;
+        this.gridX = gridX;
+        this.gridY = gridY;
         this.type = type;
     }
 
-    public int getX(){
-        return x;
-    }
+    public int getX() { return gridX * Constants.tile_size; }
+    public int getY() { return gridY * Constants.tile_size; }
 
-    public int getY(){
-        return y;
-    }
+    public int getGridX() { return gridX; }
+    public int getGridY() { return gridY; }
+    public int getType() { return type; }
 
-    public int getType(){
-        return type;
+    public void setType(int newType) {
+        this.type = newType;
     }
 
     public BufferedImage getSprite(){
