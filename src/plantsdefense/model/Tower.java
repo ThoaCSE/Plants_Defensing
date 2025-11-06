@@ -1,4 +1,4 @@
 package plantsdefense.model;
 
-public class Tower {
+public class Tower extends GameObject{
 }

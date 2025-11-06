@@ -1,4 +1,4 @@
 package plantsdefense.model;
 
-public class Enemy {
+public class Enemy extends GameObject{
 }
