@@ -16,10 +16,10 @@ public class Constants {
     public static final int rows = 30;
 
     //Tile IDs
-    public static final int tile_grass = 0;
-    public static final int tile_path = 1;
-    public static final int tile_begin = 2;
-    public  static final int tile_end = 3;
+    public static final int tile_grass = 9;
+    public static final int tile_path = 8;
+    public static final int tile_begin = 27;
+    public  static final int tile_end = 28;
     //more
 
     //Atlas settings
