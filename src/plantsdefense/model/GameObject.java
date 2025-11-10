@@ -1,4 +1,4 @@
 package plantsdefense.model;
 
-public class   GameObject {
+abstract class   GameObject {
 }
