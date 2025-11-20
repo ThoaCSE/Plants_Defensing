@@ -2,33 +2,30 @@ package plantsdefense.model.entities;
 
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
-
 import java.awt.image.BufferedImage;
 
 public class Tile {
-    private final int gridX, gridY;
+    private final int grid_x;
+    private final int grid_y;
     private int type;
 
-    public Tile(int gridX, int gridY, int type){
-        this.gridX = gridX;
-        this.gridY = gridY;
+    public Tile(int grid_x, int grid_y, int type) {
+        this.grid_x = grid_x;
+        this.grid_y = grid_y;
         this.type = type;
     }
 
-    public int getX() { return gridX * Constants.tile_size; }
-    public int getY() { return gridY * Constants.tile_size; }
-
-    public int getGridX() { return gridX; }
-    public int getGridY() { return gridY; }
+    public int getX() { return grid_x * Constants.tile_size; }
+    public int getY() { return grid_y * Constants.tile_size; }
     public int getType() { return type; }
+    public void setType(int type) { this.type = type; }
 
-    public void setType(int newType) {
-        this.type = newType;
+    public BufferedImage getSprite() {
+        int col = type % Constants.atlas_cols;
+        int row = type / Constants.atlas_cols;
+        return SpriteLoader.getSprite(col, row);
     }
 
-    public BufferedImage getSprite(){
-        int col = type % 10;
-        int row = type / 10;
-        return SpriteLoader.getSprite(col, row);
-        };
+    public int getGridX() { return grid_x; }
+    public int getGridY() { return grid_y; }
 }

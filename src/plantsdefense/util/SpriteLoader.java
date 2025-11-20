@@ -1,32 +1,24 @@
 package plantsdefense.util;
 
-import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Objects;
 
-public final class SpriteLoader {
-    private static final BufferedImage atlas;
+public class SpriteLoader {
+    private static BufferedImage atlas;
 
     static {
-        try{
-            atlas = ImageIO.read(
-                    Objects.requireNonNull(
-                            SpriteLoader.class.getResourceAsStream("/spriteatlas.png") // redraw later.
-                    )
-            );
+        try {
+            atlas = ImageIO.read(SpriteLoader.class.getResourceAsStream("/spriteatlas.png"));
         } catch (IOException e) {
-            throw new RuntimeException("Error at loading spirteatlas png", e); // change later
+            e.printStackTrace();
         }
     }
 
-    private SpriteLoader(){}
-
-    public static BufferedImage getSprite(int col, int row){
-        if (col < 0 || col >= Constants.atlas_cols || row < 0 || row >=Constants.atlas_rows){
-            throw new IllegalArgumentException("Can't adjust sprite position : col = " +col + ",  row = " + row);
-        }
-        return atlas.getSubimage(col*Constants.sprite_size, row*Constants.sprite_size, Constants.sprite_size, Constants.sprite_size);
+    public static BufferedImage getSprite(int col, int row) {
+        if (atlas == null) return null;
+        int x = col * Constants.sprite_size;
+        int y = row * Constants.sprite_size;
+        return atlas.getSubimage(x, y, Constants.sprite_size, Constants.sprite_size);
     }
 }

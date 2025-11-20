@@ -2,67 +2,79 @@ package plantsdefense.dao;
 
 import plantsdefense.model.entities.Tile;
 import plantsdefense.util.Constants;
-
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MapIO {
-    private static final String Level_path = "res/levels/"; //hello
 
-    public void saveLevel(String filename, Tile [][] grid){
-        try(PrintWriter writer = new PrintWriter(new FileWriter(Level_path + filename))){
-            for(int row = 0; row < Constants.rows; row++){
-                for(int col = 0; col < Constants.cols; col++){
-                    writer.println(grid[row][col].getType());
-                    if(col < Constants.cols - 1) writer.print(",");
-                }
-            }
-        } catch (IOException e){
-            System.err.println("Can't save game at moment due to: " + e.getMessage() );
-        }
-    }
+    private static final String MAPS_DIR = "res/levels/";
 
-    public Tile[][] loadLevel(String filename){
+    public static Tile[][] loadMap(String filename) {
         Tile[][] grid = new Tile[Constants.rows][Constants.cols];
-
-        try(BufferedReader reader = new BufferedReader(new FileReader(Level_path + filename))){
+        try (BufferedReader br = new BufferedReader(new FileReader(MAPS_DIR + filename))) {
             String line;
             int row = 0;
-            while ((line = reader.readLine()) != null && row < Constants.rows){
-                String[] types = line.split(",");
-                for(int col = 0; col < types.length && col < Constants.cols; col ++){
-                    int type = Integer.parseInt(types[col].trim());
-                    grid [row][col] = new Tile(col, row, type);
+            while ((line = br.readLine()) != null && row < Constants.rows) {
+                String[] tokens = line.split(",");
+                for (int col = 0; col < Constants.cols && col < tokens.length; col++) {
+                    int type = Integer.parseInt(tokens[col].trim());
+                    grid[row][col] = new Tile(col, row, type);
                 }
-                for (int col = types.length; col < Constants.cols; col++){
-                    grid[row][col] = new Tile(col, row, Constants.tile_grass);
-                }
-                row ++;
+                row++;
             }
-            for( ;row < Constants.rows; row++){
-                for(int col = 0; col< Constants.cols; col++){
-                    grid[row][col] = new Tile(col, row, Constants.tile_grass);
+        } catch (Exception e) {
+            return createDefaultMap();
+        }
+        fillMissingTiles(grid);
+        return grid;
+    }
+
+    public static void saveMap(String filename, Tile[][] grid) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(MAPS_DIR + filename))) {
+            for (int r = 0; r < Constants.rows; r++) {
+                for (int c = 0; c < Constants.cols; c++) {
+                    pw.print(grid[r][c].getType());
+                    if (c < Constants.cols - 1) pw.print(",");
                 }
+                pw.println();
             }
-        } catch (IOException | NumberFormatException e){
-            System.err.println("Loading error!!! Using Default: " + e.getMessage());
-            return createDefaultGrid();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> listMaps() {
+        List<String> names = new ArrayList<>();
+        File dir = new File(MAPS_DIR);
+        if (dir.exists()) {
+            for (File f : dir.listFiles((d, name) -> name.endsWith(".txt"))) {
+                names.add(f.getName());
+            }
+        }
+        return names;
+    }
+
+    private static Tile[][] createDefaultMap() {
+        Tile[][] grid = new Tile[Constants.rows][Constants.cols];
+        for (int r = 0; r < Constants.rows; r++) {
+            for (int c = 0; c < Constants.cols; c++) {
+                int type = (r == 4) ? Constants.tile_path : Constants.tile_grass;
+                if (r == 4 && c == 0) type = Constants.tile_start;
+                if (r == 4 && c == Constants.cols - 1) type = Constants.tile_end;
+                grid[r][c] = new Tile(c, r, type);
+            }
         }
         return grid;
     }
 
-    private Tile[][] createDefaultGrid(){
-        Tile[][] grid = new Tile[Constants.rows][Constants.cols];
-        for(int row = 0; row < Constants.rows; row++){
-            for (int col = 0; col< Constants.cols; col++){
-                int type = Constants.tile_grass;
-                if(row == 4){
-                    type = Constants.tile_path;
-                    if (col == 0) type = Constants.tile_start;
-                    if (col == Constants.cols - 1) type = Constants.tile_end;
+    private static void fillMissingTiles(Tile[][] grid) {
+        for (int r = 0; r < Constants.rows; r++) {
+            for (int c = 0; c < Constants.cols; c++) {
+                if (grid[r][c] == null) {
+                    grid[r][c] = new Tile(c, r, Constants.tile_grass);
                 }
-                grid[row][col] = new Tile(col, row, type);
             }
         }
-        return grid;
     }
 }
