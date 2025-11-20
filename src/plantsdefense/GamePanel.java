@@ -29,7 +29,7 @@ public class GamePanel extends JPanel implements Runnable{
                 int type = Constants.tile_grass;
                 if (row == 4){
                     type = Constants.tile_path;
-                    if (col == 0) type = Constants.tile_begin;
+                    if (col == 0) type = Constants.tile_start;
                     if (col == Constants.cols -1) type = Constants.tile_end;
                 }
                 grid [row][col] = new Tile(col, row, type);
