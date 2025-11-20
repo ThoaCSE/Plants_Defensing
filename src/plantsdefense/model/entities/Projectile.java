@@ -1,4 +1,4 @@
-package plantsdefense.model;
+package plantsdefense.model.entities;
 
 public class Projectile extends GameObject {
 }

@@ -1,4 +1,4 @@
-package plantsdefense.model;
+package plantsdefense.model.entities;
 
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
