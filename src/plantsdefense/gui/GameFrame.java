@@ -15,8 +15,4 @@ public class GameFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
     }
-
-    public static void main(String[] args){
-        SwingUtilities.invokeLater(GameFrame::new);
-    }
 }
