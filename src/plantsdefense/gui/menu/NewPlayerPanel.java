@@ -1,34 +1,61 @@
 package plantsdefense.gui.menu;
 
+import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gui.ScreenController;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class NewPlayerPanel extends JPanel {
     private final JTextField nameField = new JTextField(20);
+    private final ScreenController controller;
 
     public NewPlayerPanel(ScreenController controller) {
-        setLayout(new BorderLayout());
-        setBackground(new Color(40, 40, 60));
+        this.controller = controller;
+        setLayout(new GridBagLayout());
+        setBackground(new Color(35, 40, 65));
 
-        JLabel label = new JLabel("Enter Your Name:", SwingConstants.CENTER);
-        label.setFont(new Font("Arial", Font.BOLD, 32));
-        label.setForeground(Color.WHITE);
-        add(label, BorderLayout.NORTH);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(15, 0, 15, 0);
 
-        JPanel center = new JPanel();
-        center.add(nameField);
-        add(center, BorderLayout.CENTER);
+        // Title
+        JLabel title = new JLabel("ENTER YOUR NAME", SwingConstants.CENTER);
+        title.setFont(new Font("Consolas", Font.BOLD, 52));
+        title.setForeground(Color.CYAN);
+        add(title, gbc);
 
-        JButton start = new JButton("START GAME");
-        start.addActionListener(e -> {
-            String name = nameField.getText().trim();
-            if (!name.isEmpty()) {
-                // Later: Save player → start game
-                System.out.println("New player: " + name);
-                // controller.showPlay();
-            }
-        });
-        add(start, BorderLayout.SOUTH);
+        // Name field
+        nameField.setFont(new Font("Arial", Font.PLAIN, 36));
+        nameField.setHorizontalAlignment(JTextField.CENTER);
+        nameField.setPreferredSize(new Dimension(500, 70));
+        add(nameField, gbc);
+
+        // Start button
+        JButton startButton = new JButton("START GAME");
+        startButton.setFont(new Font("Arial", Font.BOLD, 40));
+        startButton.setPreferredSize(new Dimension(500, 90));
+        startButton.setBackground(new Color(0, 200, 0));
+        startButton.setForeground(Color.WHITE);
+        startButton.setFocusPainted(false);
+        startButton.addActionListener(e -> startGame());
+        add(startButton, gbc);
+
+        // Back button
+        JButton backButton = new JButton("← BACK TO MENU");
+        backButton.setFont(new Font("Arial", Font.BOLD, 20));
+        backButton.addActionListener(e -> controller.showMenu());
+        add(backButton, gbc);
+    }
+
+    private void startGame() {
+        String name = nameField.getText().trim();
+        if (name.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your name!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        GameSession.startNewGame(name, controller.getCurrentMapFromEditor());
+        controller.showPlay();
     }
 }
