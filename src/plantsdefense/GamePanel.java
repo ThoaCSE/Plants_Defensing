@@ -54,7 +54,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     @Override
     public void run() {
-        final double nsPerFrame = 1000000000.0/Constants.FPS;
+        final double nsPerFrame = 1000000000.0/60;
         long lastTime = System.nanoTime();
 
         while (running){
