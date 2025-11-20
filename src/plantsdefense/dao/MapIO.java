@@ -1,15 +1,11 @@
 package plantsdefense.dao;
 
-import plantsdefense.model.Tile;
-import plantsdefense.util.Constants;
+import plantsdefense.model.entities.Tile;
 import plantsdefense.util.Constants;
 
-import java.awt.image.BufferedImage;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-public class LevelDAO {
+public class MapIO {
     private static final String Level_path = "res/levels/"; //hello
 
     public void saveLevel(String filename, Tile [][] grid){

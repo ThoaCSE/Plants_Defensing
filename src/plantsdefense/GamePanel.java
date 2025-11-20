@@ -1,6 +1,6 @@
 package plantsdefense;
 
-import plantsdefense.model.Tile;
+import plantsdefense.model.entities.Tile;
 import plantsdefense.util.Constants;
 
 import javax.swing.*;

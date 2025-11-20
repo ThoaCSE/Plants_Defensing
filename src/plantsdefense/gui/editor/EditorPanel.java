@@ -1,20 +1,20 @@
-package plantsdefense.gui;
+package plantsdefense.gui.editor;
 
-import plantsdefense.dao.LevelDAO;
-import plantsdefense.model.Tile;
+import plantsdefense.dao.MapIO;
+import plantsdefense.gui.components.Button;
+import plantsdefense.model.entities.Tile;
 import plantsdefense.util.Constants;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class EditorPanel extends JPanel {
 
     private final Tile[][] grid;
-    private final Button[] tileButtons = new Button[4];
-    private final LevelDAO dao = new LevelDAO();
+    private final plantsdefense.gui.components.Button[] tileButtons = new plantsdefense.gui.components.Button[4];
+    private final MapIO dao = new MapIO();
     private int selectedType = Constants.tile_grass;
 
     public EditorPanel() {
@@ -37,7 +37,7 @@ public class EditorPanel extends JPanel {
 
         for (int i = 0; i < 4; i++) {
             int idx = i;
-            tileButtons[i] = new Button(labels[i], 10, 50 + i * 50, e -> selectTileType(types[idx]));
+            tileButtons[i] = new plantsdefense.gui.components.Button(labels[i], 10, 50 + i * 50, e -> selectTileType(types[idx]));
             add(tileButtons[i]);
         }
         tileButtons[0].setSelected(true);   // default = Grass
@@ -45,8 +45,8 @@ public class EditorPanel extends JPanel {
 
     private void selectTileType(int type) {
         selectedType = type;
-        for (Button b : tileButtons) b.deselect();
-        for (Button b : tileButtons) {
+        for (plantsdefense.gui.components.Button b : tileButtons) b.deselect();
+        for (plantsdefense.gui.components.Button b : tileButtons) {
             if (b.getText().equals(labelFor(type))) {
                 b.setSelected(true);
                 break;
@@ -65,7 +65,7 @@ public class EditorPanel extends JPanel {
     }
 
     private void setupSaveButton() {
-        Button save = new Button("SAVE", 10, 300, e -> { dao.saveLevel("level1.txt", grid); JOptionPane.showMessageDialog(this, "Saved!"); });
+        plantsdefense.gui.components.Button save = new Button("SAVE", 10, 300, e -> { dao.saveLevel("level1.txt", grid); JOptionPane.showMessageDialog(this, "Saved!"); });
         add(save);
     }
 

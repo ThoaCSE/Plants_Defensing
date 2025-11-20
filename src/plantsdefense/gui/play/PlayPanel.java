@@ -1,4 +1,4 @@
-package plantsdefense.gui;
+package plantsdefense.gui.play;
 
 import javax.swing.*;
 

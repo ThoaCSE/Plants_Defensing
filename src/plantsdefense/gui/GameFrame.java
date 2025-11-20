@@ -1,10 +1,8 @@
-package plantsdefense;
+package plantsdefense.gui;
 
-import plantsdefense.gui.EditorPanel;
-import plantsdefense.util.Constants;
+import plantsdefense.gui.editor.EditorPanel;
 
 import javax.swing.*;
-import java.awt.*;
 
 public class GameFrame extends JFrame {
     public GameFrame(){
