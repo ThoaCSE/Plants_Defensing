@@ -43,7 +43,7 @@ public class NewPlayerPanel extends JPanel {
         add(startButton, gbc);
 
         // Back button
-        JButton backButton = new JButton("← BACK TO MENU");
+        JButton backButton = new JButton("MENU");
         backButton.setFont(new Font("Arial", Font.BOLD, 20));
         backButton.addActionListener(e -> controller.showMenu());
         add(backButton, gbc);

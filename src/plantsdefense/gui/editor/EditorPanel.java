@@ -80,7 +80,7 @@ public class EditorPanel extends JPanel {
 
     private void loadDefaultMap() {
         try {
-            grid = MapIO.loadMap("default_map.txt");
+            grid = MapIO.loadMap("level1.txt");
         } catch (Exception e) {
             grid = new Tile[Constants.rows][Constants.cols];
             for (int r = 0; r < Constants.rows; r++) {

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Enemy extends GameObject {
     private static final int SIZE = 48;
-    private static final int SPEED = 1;
+    private static final int SPEED = 4;
     private final List<Point> path;
     private int pathIndex = 0;
     private int health = 100;
