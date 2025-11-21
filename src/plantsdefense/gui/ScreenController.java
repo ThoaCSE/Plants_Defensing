@@ -68,7 +68,7 @@ public class ScreenController {
             return editorPanel.getCurrentGrid();
         }
         // Fallback to default
-        return plantsdefense.dao.MapIO.loadMap("default_map.txt");
+        return plantsdefense.dao.MapIO.loadMap("level1.txt");
     }
 
     private void ensurePanel(JPanel panel, String name) {
