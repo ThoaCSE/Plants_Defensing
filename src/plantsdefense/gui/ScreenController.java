@@ -80,4 +80,10 @@ public class ScreenController {
         panel.setName(name);
         container.add(panel, name);
     }
+
+    public void remove(JPanel panel) {
+        container.remove(panel);
+        container.revalidate();
+        container.repaint();
+    }
 }

@@ -29,5 +29,7 @@ public class GameSession {
     public static void spendGold(int amount) { gold -= amount; }
     public static void nextWave() { wave++; }
 
-    public static boolean isGameOver() { return lives <= 0; }
+    public static boolean isGameOver() {
+        return lives <= 0;
+    }
 }
