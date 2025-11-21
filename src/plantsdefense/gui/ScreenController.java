@@ -32,6 +32,7 @@ public class ScreenController {
     }
 
     public void showMenu() {
+        if (playPanel != null) playPanel.stopGame(); // Safety stop
         layout.show(container, MENU);
     }
 
@@ -41,6 +42,7 @@ public class ScreenController {
     }
 
     public void showEditor() {
+        if (playPanel != null) playPanel.stopGame(); // Safety stop
         if (editorPanel == null) {
             editorPanel = new EditorPanel(this);
             container.add(editorPanel, EDITOR);
@@ -49,41 +51,34 @@ public class ScreenController {
     }
 
     public void showPlay() {
+        // 1. Stop old thread
         if (playPanel != null) {
+            playPanel.stopGame();
             container.remove(playPanel);
         }
-        playPanel = new PlayPanel();
+
+        // 2. Create fresh panel
+        playPanel = new PlayPanel(this);
         container.add(playPanel, PLAY);
         layout.show(container, PLAY);
     }
 
-    // Called by EditorPanel when user wants to play
     public void playCurrentMap() {
         showPlay();
     }
 
-    // Get the latest map from editor (or default)
     public Tile[][] getCurrentMapFromEditor() {
         if (editorPanel != null) {
             return editorPanel.getCurrentGrid();
         }
-        // Fallback to default
         return plantsdefense.dao.MapIO.loadMap("level1.txt");
     }
 
     private void ensurePanel(JPanel panel, String name) {
         for (Component c : container.getComponents()) {
-            if (name.equals(c.getName())) {
-                return;
-            }
+            if (name.equals(c.getName())) return;
         }
         panel.setName(name);
         container.add(panel, name);
-    }
-
-    public void remove(JPanel panel) {
-        container.remove(panel);
-        container.revalidate();
-        container.repaint();
     }
 }
