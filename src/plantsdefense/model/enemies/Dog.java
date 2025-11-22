@@ -1,4 +1,4 @@
-package plantsdefense.model.enemy;
+package plantsdefense.model.enemies;
 
 import plantsdefense.util.SpriteLoader;
 import java.awt.*;
