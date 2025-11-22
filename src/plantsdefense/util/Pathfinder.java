@@ -1,6 +1,6 @@
 package plantsdefense.util;
 
-import plantsdefense.model.entities.Tile;
+import plantsdefense.model.Tile;
 
 import java.awt.Point;
 import java.util.*;

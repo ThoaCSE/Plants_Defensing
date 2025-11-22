@@ -1,4 +1,4 @@
-package plantsdefense.model.entities;
+package plantsdefense.model;
 
 import java.awt.*;
 

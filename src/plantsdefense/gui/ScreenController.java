@@ -4,7 +4,7 @@ import plantsdefense.gui.editor.EditorPanel;
 import plantsdefense.gui.menu.MenuPanel;
 import plantsdefense.gui.menu.NewPlayerPanel;
 import plantsdefense.gui.play.PlayPanel;
-import plantsdefense.model.entities.Tile;
+import plantsdefense.model.Tile;
 
 import javax.swing.*;
 import java.awt.*;
@@ -71,7 +71,7 @@ public class ScreenController {
         if (editorPanel != null) {
             return editorPanel.getCurrentGrid();
         }
-        return plantsdefense.dao.MapIO.loadMap("level1.txt");
+        return plantsdefense.jdbc.MapIO.loadMap("level1.txt");
     }
 
     private void ensurePanel(JPanel panel, String name) {

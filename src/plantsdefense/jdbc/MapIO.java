@@ -1,6 +1,6 @@
-package plantsdefense.dao;
+package plantsdefense.jdbc;
 
-import plantsdefense.model.entities.Tile;
+import plantsdefense.model.Tile;
 import plantsdefense.util.Constants;
 import java.io.*;
 import java.util.ArrayList;
