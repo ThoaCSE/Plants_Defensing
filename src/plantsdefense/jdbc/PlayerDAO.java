@@ -1,4 +1,4 @@
-package plantsdefense.dao;
+package plantsdefense.jdbc;
 
 public class PlayerDAO {
 }

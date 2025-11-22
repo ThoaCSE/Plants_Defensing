@@ -1,4 +1,4 @@
 package plantsdefense.gui.components;
 
-public class TileSelector {
+public class PlantHUD {
 }

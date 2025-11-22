@@ -3,8 +3,8 @@ package plantsdefense.gui.play;
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gamelogic.WaveManager;
 import plantsdefense.gui.ScreenController;
-import plantsdefense.model.entities.GameObject;
-import plantsdefense.model.entities.Tile;
+import plantsdefense.model.GameObject;
+import plantsdefense.model.Tile;
 import plantsdefense.util.Constants;
 
 import javax.swing.*;

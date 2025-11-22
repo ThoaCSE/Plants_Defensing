@@ -1,6 +1,6 @@
 package plantsdefense.gamelogic;
 
-import plantsdefense.model.entities.Tile;
+import plantsdefense.model.Tile;
 
 public class GameSession {
     private static String currentPlayerName;

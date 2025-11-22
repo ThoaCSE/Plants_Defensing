@@ -1,8 +1,8 @@
 package plantsdefense.gui.editor;
 
-import plantsdefense.dao.MapIO;
+import plantsdefense.jdbc.MapIO;
 import plantsdefense.gui.ScreenController;
-import plantsdefense.model.entities.Tile;
+import plantsdefense.model.Tile;
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
 
