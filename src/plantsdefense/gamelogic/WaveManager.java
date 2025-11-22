@@ -2,7 +2,7 @@ package plantsdefense.gamelogic;
 
 import plantsdefense.model.GameObject;
 import plantsdefense.model.Tile;
-import plantsdefense.model.enemy.*;
+import plantsdefense.model.enemies.*;
 import plantsdefense.util.Constants;
 import plantsdefense.util.Pathfinder;
 
@@ -20,15 +20,13 @@ public class WaveManager {
     private long nextSpawnTime = 0;
 
     // Defines the enemies for each wave: {Zombies, Skeletons, Bats, Dogs}
-    // Index 0 = Wave 1, Index 1 = Wave 2, etc.
     private final int[][] wavesConfig = {
-            {5, 0, 0, 0},   // Wave 1: 5 Zombies
-            {5, 0, 0, 3},   // Wave 2: 5 Zombies, 3 Dogs
-            {5, 2, 2, 0},   // Wave 3: 5 Zombies, 2 Skeletons, 2 Bats
-            {10, 5, 5, 5}   // Wave 4: The Horde
+            {3, 0, 0, 0},   // Wave 1: Easy
+            {5, 0, 0, 3},   // Wave 2: Dogs introduced
+            {5, 2, 2, 0},   // Wave 3: Mixed
+            {10, 5, 5, 5}   // Wave 4: Horde
     };
 
-    // Temporary counter for the current running wave
     private int[] currentWaveLeft = new int[4];
 
     public WaveManager(List<GameObject> gameObjects, Tile[][] map) {
@@ -39,34 +37,35 @@ public class WaveManager {
     public void startNextWave() {
         if (waveActive) return;
 
-        int waveIndex = GameSession.getWave(); // Assuming starts at 0 or 1
-        // Safety check if we run out of defined waves
+        int waveIndex = GameSession.getWave();
+
+        // Check if we exceeded max waves (Victory condition handled in isLevelFinished)
         if (waveIndex >= wavesConfig.length) {
-            System.out.println("All waves cleared!");
             return;
         }
 
-        // Load configuration for this wave
+        // Load configuration
         int[] config = wavesConfig[waveIndex];
-        currentWaveLeft[0] = config[0]; // Zombies
-        currentWaveLeft[1] = config[1]; // Skeletons
-        currentWaveLeft[2] = config[2]; // Bats
-        currentWaveLeft[3] = config[3]; // Dogs
+        currentWaveLeft[0] = config[0];
+        currentWaveLeft[1] = config[1];
+        currentWaveLeft[2] = config[2];
+        currentWaveLeft[3] = config[3];
 
         enemiesToSpawnTotal = config[0] + config[1] + config[2] + config[3];
         enemiesSpawned = 0;
         waveActive = true;
 
-        GameSession.nextWave(); // Increment global wave counter
-        nextSpawnTime = System.currentTimeMillis() + 2000; // Start in 2 seconds
+        GameSession.nextWave();
+        nextSpawnTime = System.currentTimeMillis() + 2000;
     }
 
     public void update() {
         if (!waveActive) return;
 
-        // Check if we finished spawning everyone
+        // Check if we finished spawning this wave
         if (enemiesSpawned >= enemiesToSpawnTotal) {
-            // Check if all enemies are dead to mark wave as "Complete" (Optional logic)
+            // Wave logic ends when all enemies are spawned.
+            // The GameSession checks if they are dead to potentially start next wave logic UI
             boolean enemiesAlive = gameObjects.stream().anyMatch(o -> o instanceof Enemy);
             if (!enemiesAlive) {
                 waveActive = false;
@@ -77,8 +76,22 @@ public class WaveManager {
         long now = System.currentTimeMillis();
         if (now >= nextSpawnTime) {
             spawnNextEnemy();
-            nextSpawnTime = now + 1000; // 1 second delay between enemies
+            nextSpawnTime = now + 1500;
         }
+    }
+
+    // NEW: Checks if the player has beaten all waves
+    public boolean isLevelFinished() {
+        // 1. Must have finished the last wave index
+        if (GameSession.getWave() >= wavesConfig.length) {
+            // 2. Wave must not be active (spawning done)
+            if (!waveActive) {
+                // 3. No enemies left alive on map
+                boolean enemiesAlive = gameObjects.stream().anyMatch(o -> o instanceof Enemy);
+                return !enemiesAlive;
+            }
+        }
+        return false;
     }
 
     private void spawnNextEnemy() {
@@ -87,27 +100,15 @@ public class WaveManager {
 
         if (start == null || end == null) return;
 
-        // Calculate path
         List<Point> path = Pathfinder.findPath(map, start, end);
         if (path.isEmpty() || path.size() <= 1) return;
 
         Enemy newEnemy = null;
 
-        // Prioritize spawning in order: Zombie -> Dog -> Bat -> Skeleton
-        // You can change this order to mix them up
-        if (currentWaveLeft[0] > 0) {
-            newEnemy = new Zombie(path);
-            currentWaveLeft[0]--;
-        } else if (currentWaveLeft[3] > 0) {
-            newEnemy = new Dog(path);
-            currentWaveLeft[3]--;
-        } else if (currentWaveLeft[2] > 0) {
-            newEnemy = new Bat(path);
-            currentWaveLeft[2]--;
-        } else if (currentWaveLeft[1] > 0) {
-            newEnemy = new Skeleton(path);
-            currentWaveLeft[1]--;
-        }
+        if (currentWaveLeft[0] > 0) { newEnemy = new Zombie(path); currentWaveLeft[0]--; }
+        else if (currentWaveLeft[3] > 0) { newEnemy = new Dog(path); currentWaveLeft[3]--; }
+        else if (currentWaveLeft[2] > 0) { newEnemy = new Bat(path); currentWaveLeft[2]--; }
+        else if (currentWaveLeft[1] > 0) { newEnemy = new Skeleton(path); currentWaveLeft[1]--; }
 
         if (newEnemy != null) {
             gameObjects.add(newEnemy);
@@ -118,9 +119,7 @@ public class WaveManager {
     private Point findTile(int type) {
         for (int r = 0; r < Constants.rows; r++) {
             for (int c = 0; c < Constants.cols; c++) {
-                if (map[r][c].getType() == type) {
-                    return new Point(c, r);
-                }
+                if (map[r][c].getType() == type) return new Point(c, r);
             }
         }
         return null;

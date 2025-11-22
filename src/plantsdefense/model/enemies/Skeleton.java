@@ -1,4 +1,4 @@
-package plantsdefense.model.enemy;
+package plantsdefense.model.enemies;
 
 import java.util.List;
 import java.awt.Point;

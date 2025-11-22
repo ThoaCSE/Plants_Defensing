@@ -26,7 +26,7 @@ public class GameSession {
 
     public static void loseLife() { lives--; }
     public static void addGold(int amount) { gold += amount; }
-    public static void spendGold(int amount) { gold -= amount; }
+    public static void removeGold(int amount) { gold -= amount; }
     public static void nextWave() { wave++; }
 
     public static boolean isGameOver() {

@@ -1,4 +1,4 @@
-package plantsdefense.model.enemy;
+package plantsdefense.model.enemies;
 
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.model.GameObject;
