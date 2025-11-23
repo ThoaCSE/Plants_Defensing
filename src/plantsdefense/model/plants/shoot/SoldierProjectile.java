@@ -1,16 +1,14 @@
 package plantsdefense.model.plants.shoot;
 
 import plantsdefense.model.enemies.Enemy;
+import plantsdefense.model.enemies.EnemyType;
+import plantsdefense.model.plants.Projectile;
 
 public class SoldierProjectile extends Projectile {
-    // We store the vector so it flies straight even if enemy moves
     private double dx, dy;
 
     public SoldierProjectile(double x, double y, Enemy target) {
-        // Speed: 5.0, Dmg: 20, Sprite: (1, 9)
         super(x, y, target, 5.0f, 20, 1, 9);
-
-        // Calculate vector once (Linear shot)
         double angle = Math.atan2(target.getY() - y, target.getX() - x);
         this.dx = Math.cos(angle) * speed;
         this.dy = Math.sin(angle) * speed;
@@ -20,11 +18,20 @@ public class SoldierProjectile extends Projectile {
     protected void move() {
         x += dx;
         y += dy;
-        // Logic to die if out of bounds could go here
+        if (x < 0 || y < 0 || x > 2000 || y > 2000) kill();
     }
 
     @Override
     protected void onHit(Enemy e) {
+        if (e.getType() == EnemyType.Aerial) return; // Miss Bats
+
         e.takeDamage(damage);
+
+        // --- NEW LOGIC: KNOCKBACK ONLY IF ALIVE ---
+        // If the enemy survives the damage, we push them back.
+        // If they died from the damage, they just die (no push).
+        if (e.isAlive()) {
+            e.knockBack(3);
+        }
     }
 }

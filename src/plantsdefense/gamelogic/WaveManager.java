@@ -7,7 +7,9 @@ import plantsdefense.util.Constants;
 import plantsdefense.util.Pathfinder;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class WaveManager {
     private final List<GameObject> gameObjects;
@@ -19,32 +21,50 @@ public class WaveManager {
     private int enemiesToSpawnTotal = 0;
     private long nextSpawnTime = 0;
 
-    // Defines the enemies for each wave: {Zombies, Skeletons, Bats, Dogs}
-    private final int[][] wavesConfig = {
-            {3, 0, 0, 0},   // Wave 1: Easy
-            {5, 0, 0, 3},   // Wave 2: Dogs introduced
-            {5, 2, 2, 0},   // Wave 3: Mixed
-            {10, 5, 5, 5}   // Wave 4: Horde
-    };
-
+    // Config
+    private final int[][] wavesConfig;
     private int[] currentWaveLeft = new int[4];
 
-    public WaveManager(List<GameObject> gameObjects, Tile[][] map) {
+    // Pathing Cache
+    private final List<Point> spawnPoints = new ArrayList<>();
+    private final List<Point> endPoints = new ArrayList<>();
+    private final Random random = new Random();
+
+    public WaveManager(List<GameObject> gameObjects, Tile[][] map, int[][] wavesConfig) {
         this.gameObjects = gameObjects;
         this.map = map;
+        this.wavesConfig = wavesConfig;
+
+        // 1. Pre-scan the map for ALL start and end points
+        findPathPoints();
+    }
+
+    private void findPathPoints() {
+        spawnPoints.clear();
+        endPoints.clear();
+
+        for (int r = 0; r < Constants.rows; r++) {
+            for (int c = 0; c < Constants.cols; c++) {
+                int type = map[r][c].getType();
+                if (type == Constants.tile_start) {
+                    spawnPoints.add(new Point(c, r));
+                } else if (type == Constants.tile_end) {
+                    endPoints.add(new Point(c, r));
+                }
+            }
+        }
+
+        // Debug check
+        if (spawnPoints.isEmpty()) System.out.println("WARNING: No Start Tiles found!");
+        if (endPoints.isEmpty()) System.out.println("WARNING: No End Tiles found!");
     }
 
     public void startNextWave() {
         if (waveActive) return;
 
         int waveIndex = GameSession.getWave();
+        if (waveIndex >= wavesConfig.length) return;
 
-        // Check if we exceeded max waves (Victory condition handled in isLevelFinished)
-        if (waveIndex >= wavesConfig.length) {
-            return;
-        }
-
-        // Load configuration
         int[] config = wavesConfig[waveIndex];
         currentWaveLeft[0] = config[0];
         currentWaveLeft[1] = config[1];
@@ -62,10 +82,7 @@ public class WaveManager {
     public void update() {
         if (!waveActive) return;
 
-        // Check if we finished spawning this wave
         if (enemiesSpawned >= enemiesToSpawnTotal) {
-            // Wave logic ends when all enemies are spawned.
-            // The GameSession checks if they are dead to potentially start next wave logic UI
             boolean enemiesAlive = gameObjects.stream().anyMatch(o -> o instanceof Enemy);
             if (!enemiesAlive) {
                 waveActive = false;
@@ -80,31 +97,36 @@ public class WaveManager {
         }
     }
 
-    // NEW: Checks if the player has beaten all waves
     public boolean isLevelFinished() {
-        // 1. Must have finished the last wave index
         if (GameSession.getWave() >= wavesConfig.length) {
-            // 2. Wave must not be active (spawning done)
             if (!waveActive) {
-                // 3. No enemies left alive on map
-                boolean enemiesAlive = gameObjects.stream().anyMatch(o -> o instanceof Enemy);
-                return !enemiesAlive;
+                return gameObjects.stream().noneMatch(o -> o instanceof Enemy);
             }
         }
         return false;
     }
 
     private void spawnNextEnemy() {
-        Point start = findTile(Constants.tile_start);
-        Point end = findTile(Constants.tile_end);
+        if (spawnPoints.isEmpty() || endPoints.isEmpty()) return;
 
-        if (start == null || end == null) return;
+        // 2. Randomly pick one of the Start Points
+        Point start = spawnPoints.get(random.nextInt(spawnPoints.size()));
 
-        List<Point> path = Pathfinder.findPath(map, start, end);
-        if (path.isEmpty() || path.size() <= 1) return;
+        // 3. Find a path to ANY reachable end point
+        // (Usually there is just 1 end, but if you have split lanes, this checks all)
+        List<Point> path = null;
+
+        for (Point end : endPoints) {
+            List<Point> testPath = Pathfinder.findPath(map, start, end);
+            if (testPath != null && !testPath.isEmpty()) {
+                path = testPath;
+                break; // Found a valid path!
+            }
+        }
+
+        if (path == null || path.size() <= 1) return;
 
         Enemy newEnemy = null;
-
         if (currentWaveLeft[0] > 0) { newEnemy = new Zombie(path); currentWaveLeft[0]--; }
         else if (currentWaveLeft[3] > 0) { newEnemy = new Dog(path); currentWaveLeft[3]--; }
         else if (currentWaveLeft[2] > 0) { newEnemy = new Bat(path); currentWaveLeft[2]--; }
@@ -114,14 +136,5 @@ public class WaveManager {
             gameObjects.add(newEnemy);
             enemiesSpawned++;
         }
-    }
-
-    private Point findTile(int type) {
-        for (int r = 0; r < Constants.rows; r++) {
-            for (int c = 0; c < Constants.cols; c++) {
-                if (map[r][c].getType() == type) return new Point(c, r);
-            }
-        }
-        return null;
     }
 }

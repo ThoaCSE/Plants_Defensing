@@ -10,32 +10,31 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 public abstract class Enemy extends GameObject {
-    // Stats defined by subclasses
     protected float speed;
     protected double health;
     protected double maxHealth;
     protected EnemyType type;
     protected int rewardGold;
+    protected int scoreValue;
 
-    // Sprite sheet coordinates
-    protected int spriteRow;
-    protected int spriteCol;
-
-    // Pathing
+    protected int spriteRow, spriteCol;
     protected List<Point> path;
     protected int pathIndex = 0;
 
-    // Debuff Logic
     protected int slowDuration = 0;
+    protected int burnDuration = 0;
 
-    public Enemy(List<Point> path, EnemyType type, float speed, int health, int rewardGold, int spriteRow, int spriteCol) {
-        super(0, 0); // Position will be set in setStartPos()
+    protected static final int DRAW_SIZE = 48;
+
+    public Enemy(List<Point> path, EnemyType type, float speed, int health, int rewardGold, int scoreValue, int spriteRow, int spriteCol) {
+        super(0, 0);
         this.path = path;
         this.type = type;
         this.speed = speed;
         this.health = health;
         this.maxHealth = health;
         this.rewardGold = rewardGold;
+        this.scoreValue = scoreValue;
         this.spriteRow = spriteRow;
         this.spriteCol = spriteCol;
         setStartPos();
@@ -44,7 +43,6 @@ public abstract class Enemy extends GameObject {
     private void setStartPos() {
         if (path != null && !path.isEmpty()) {
             Point start = path.get(0);
-            // Center the enemy on the tile
             this.x = start.x * Constants.tile_size + Constants.tile_size / 2.0;
             this.y = start.y * Constants.tile_size + Constants.tile_size / 2.0;
         }
@@ -53,33 +51,24 @@ public abstract class Enemy extends GameObject {
     @Override
     public void update() {
         if (!alive) return;
-
-        // 1. Check End of Path
         if (pathIndex >= path.size()) {
             GameSession.loseLife();
             kill();
             return;
         }
-
-        // 2. Move Logic
         moveAlongPath();
-
-        // 3. Handle Status Effects (Debuffs)
         if (slowDuration > 0) slowDuration--;
+        if (burnDuration > 0) burnDuration--;
     }
 
     protected void moveAlongPath() {
         if (pathIndex >= path.size()) return;
-
         Point target = path.get(pathIndex);
         double tx = target.x * Constants.tile_size + Constants.tile_size / 2.0;
         double ty = target.y * Constants.tile_size + Constants.tile_size / 2.0;
-
         double dx = tx - x;
         double dy = ty - y;
         double dist = Math.hypot(dx, dy);
-
-        // Logic: If slowed, speed is reduced by 50%
         float currentSpeed = (slowDuration > 0) ? speed * 0.5f : speed;
 
         if (dist < currentSpeed) {
@@ -90,21 +79,36 @@ public abstract class Enemy extends GameObject {
         }
     }
 
-    public void takeDamage(int damage) {
-        health -= damage;
-        if (health <= 0) {
-            GameSession.addGold(rewardGold);
-            kill();
+    public void knockBack(int tiles) {
+        this.pathIndex -= tiles;
+        if (this.pathIndex < 0) this.pathIndex = 0;
+        if (pathIndex < path.size()) {
+            Point target = path.get(pathIndex);
+            this.x = target.x * Constants.tile_size + Constants.tile_size / 2.0;
+            this.y = target.y * Constants.tile_size + Constants.tile_size / 2.0;
         }
     }
 
-    // Logic to extend debuff duration (Stacking time)
-    public void applySlow(int durationFrames) {
-        if (this.slowDuration > 0) {
-            this.slowDuration += durationFrames;
-        } else {
-            this.slowDuration = durationFrames;
+    // --- UPDATED: Returns TRUE if enemy died ---
+    public boolean takeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            GameSession.addGold(rewardGold);
+            GameSession.addScore(scoreValue);
+            kill();
+            return true; // Returns TRUE if enemy died
         }
+        return false; // Returns FALSE if enemy survived
+    }
+
+    public void applySlow(int durationFrames) {
+        if (this.slowDuration > 0) this.slowDuration += durationFrames;
+        else this.slowDuration = durationFrames;
+    }
+
+    public void applyBurn(int durationFrames) {
+        if (this.burnDuration > 0) this.burnDuration += durationFrames;
+        else this.burnDuration = durationFrames;
     }
 
     public EnemyType getType() { return type; }
@@ -114,15 +118,25 @@ public abstract class Enemy extends GameObject {
     public void render(Graphics2D g) {
         BufferedImage sprite = SpriteLoader.getSprite(spriteCol, spriteRow);
         if (sprite != null) {
-            // Render at 32x32 size, centered
-            int size = 32;
-            g.drawImage(sprite, (int)(x - size/2), (int)(y - size/2), size, size, null);
-
-            // Simple Health Bar
+            int drawX = (int)(x - DRAW_SIZE / 2);
+            int drawY = (int)(y - DRAW_SIZE / 2);
+            g.drawImage(sprite, drawX, drawY, DRAW_SIZE, DRAW_SIZE, null);
+            drawDebuffEffects(g, drawX, drawY, DRAW_SIZE);
             g.setColor(Color.RED);
-            g.fillRect((int)x - 10, (int)y - 20, 20, 4);
+            g.fillRect((int)x - 10, (int)y - 28, 20, 4);
             g.setColor(Color.GREEN);
-            g.fillRect((int)x - 10, (int)y - 20, (int)(20 * (health / maxHealth)), 4);
+            g.fillRect((int)x - 10, (int)y - 28, (int)(20 * (health / maxHealth)), 4);
+        }
+    }
+
+    protected void drawDebuffEffects(Graphics2D g, int dx, int dy, int size) {
+        if (slowDuration > 0) {
+            g.setColor(new Color(0, 200, 255, 100));
+            g.fillRect(dx, dy, size, size);
+        }
+        if (burnDuration > 0) {
+            g.setColor(new Color(255, 60, 0, 100));
+            g.fillRect(dx, dy, size, size);
         }
     }
 }

@@ -5,13 +5,14 @@ import java.awt.Point;
 
 public class Skeleton extends Enemy {
     public Skeleton(List<Point> path) {
-        super(path, EnemyType.Undead, 0.8f, 150, 15, 1, 2);
+        // Path, Type, Speed, Health, Gold, Score, Row, Col
+        super(path, EnemyType.Undead, 0.8f, 150, 15, 30, 1, 2);
     }
 
+    // FIX: Change return type to 'boolean' and return the result of super.takeDamage
     @Override
-    public void takeDamage(int damage) {
-        // Armor Logic: Reduces damage by 30%
-        int reducedDamage = (int)(damage * 0.7);
-        super.takeDamage(reducedDamage);
+    public boolean takeDamage(int damage) {
+        // Apply armor (30% reduction) and pass to parent
+        return super.takeDamage((int)(damage * 0.7));
     }
 }

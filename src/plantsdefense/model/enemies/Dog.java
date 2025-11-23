@@ -9,8 +9,9 @@ import java.util.List;
 public class Dog extends Enemy {
 
     public Dog(List<Point> path) {
-        // Path, Type, Speed, Health, Gold, Row, Col
-        super(path, EnemyType.Beast, 2.0f, 60, 12, 1, 3);
+        // Path, Type, Speed, Health, Gold, Score, Row, Col
+        // Speed 2.0 (Fast), Health 60 (Low)
+        super(path, EnemyType.Beast, 2.0f, 60, 12, 25, 1, 3);
     }
 
     @Override
@@ -18,30 +19,33 @@ public class Dog extends Enemy {
         BufferedImage sprite = SpriteLoader.getSprite(spriteCol, spriteRow);
 
         if (sprite != null) {
-            // 1. Save the current "camera" state
-            AffineTransform oldTransform = g.getTransform();
+            AffineTransform old = g.getTransform();
 
-            // 2. Move "pivot" to the center of the enemy (x, y)
+            // 1. Move "Pen" to the center of the Dog
             g.translate(x, y);
 
-            // 3. Rotate -90 degrees (Math.toRadians(-90))
-            // This turns a "Down-facing" sprite to "Right-facing"
+            // 2. Rotate -90 degrees (Face Right)
             g.rotate(Math.toRadians(-90));
 
-            // 4. Draw the sprite centered at (0, 0) relative to the pivot
-            // Since we translated to (x,y), drawing at (-16, -16) centers the 32x32 sprite
-            g.drawImage(sprite, -16, -16, 32, 32, null);
+            // 3. Draw Big Sprite (48x48)
+            // Offset is half of size: -24
+            int size = 48;
+            int offset = -size / 2; // -24
 
-            // 5. Restore the camera state (So the health bar doesn't rotate!)
-            g.setTransform(oldTransform);
+            g.drawImage(sprite, offset, offset, size, size, null);
 
-            // 6. Draw Health Bar (Standard, non-rotated)
+            // 4. Draw Debuffs (Rotated with Dog)
+            drawDebuffEffects(g, offset, offset, size);
+
+            // 5. Restore Rotation for Health Bar
+            g.setTransform(old);
+
+            // 6. Draw Health Bar (Floating above)
             g.setColor(Color.RED);
-            g.fillRect((int)x - 10, (int)y - 20, 20, 4);
-
+            g.fillRect((int)x - 12, (int)y - 30, 24, 4);
             g.setColor(Color.GREEN);
-            double hpRatio = health / maxHealth;
-            g.fillRect((int)x - 10, (int)y - 20, (int)(20 * hpRatio), 4);
+            double hpPercent = health / maxHealth;
+            g.fillRect((int)x - 12, (int)y - 30, (int)(24 * hpPercent), 4);
         }
     }
 }

@@ -2,6 +2,7 @@ package plantsdefense.gui.menu;
 
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gui.ScreenController;
+import plantsdefense.jdbc.MapIO;
 
 import javax.swing.*;
 import java.awt.*;
@@ -55,7 +56,13 @@ public class NewPlayerPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please enter your name!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        GameSession.startNewGame(name, controller.getCurrentMapFromEditor());
-        controller.showPlay();
+
+        // --- FIXED: ADDED LEVEL 1 (int) TO THE ARGUMENTS ---
+        if (MapIO.loadMap("level1.txt") != null) {
+            GameSession.startNewGame(name, MapIO.loadMap("level1.txt"), 1); // <--- FIX IS HERE
+            controller.showPlay();
+        } else {
+            JOptionPane.showMessageDialog(this, "Could not load level1.txt", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

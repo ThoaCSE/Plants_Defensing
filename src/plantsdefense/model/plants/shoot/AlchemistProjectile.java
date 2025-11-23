@@ -1,17 +1,18 @@
 package plantsdefense.model.plants.shoot;
 
 import plantsdefense.model.enemies.Enemy;
+import plantsdefense.model.plants.Projectile;
 
 public class AlchemistProjectile extends Projectile {
 
     public AlchemistProjectile(double x, double y, Enemy target) {
-        // Speed: 4.0, Dmg: 10, Sprite: (1, 8)
+        // Speed: 4.0, Dmg: 10, Sprite Row: 1, Col: 8
         super(x, y, target, 4.0f, 10, 1, 8);
     }
 
     @Override
     protected void move() {
-        // Standard homing or linear. Let's do Homing for accuracy.
+        // Homing Logic (Alchemists don't miss potions)
         if (target != null) {
             double angle = Math.atan2(target.getY() - y, target.getX() - x);
             x += Math.cos(angle) * speed;
@@ -21,24 +22,22 @@ public class AlchemistProjectile extends Projectile {
 
     @Override
     protected void onHit(Enemy e) {
+        // Base Damage
         e.takeDamage(damage);
 
-        // UNIQUE LOGIC: Apply Debuff based on Type
+        // --- LOGIC: TYPE BASED DEBUFFS ---
         switch (e.getType()) {
             case Beast: // Dog
-                // Apply Slowness (Duration: 120 frames = 2 seconds)
-                e.applySlow(120);
+                e.applySlow(120); // Slow (Blue) for 2 seconds
                 break;
 
             case Undead: // Zombie/Skeleton
-                // Apply "Holy Burn" (Damage multiplier or just extra damage)
-                e.takeDamage(damage * 2); // Critical hit!
+                e.takeDamage(damage); // Double Damage (Holy Water)
+                e.applyBurn(60);      // Burn (Red) for 1 second
                 break;
 
             case Aerial: // Bat
-                // Logic: Clip their wings (Stun or massive slow)
-                // Since Bat.applySlow() is empty/immune, we deal extra damage instead
-                e.takeDamage(damage + 10);
+                e.takeDamage(damage + 5); // Extra Damage
                 break;
         }
     }
