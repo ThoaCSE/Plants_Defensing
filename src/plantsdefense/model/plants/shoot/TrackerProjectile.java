@@ -1,6 +1,7 @@
 package plantsdefense.model.plants.shoot;
 
 import plantsdefense.model.enemies.Enemy;
+import plantsdefense.model.plants.Projectile;
 
 public class TrackerProjectile extends Projectile {
 

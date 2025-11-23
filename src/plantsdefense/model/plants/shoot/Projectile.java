@@ -1,7 +1,7 @@
-package plantsdefense.model.plants.shoot;
+package plantsdefense.model.plants;
 
 import plantsdefense.model.GameObject;
-import plantsdefense.model.enemies.Enemy; // IMPORT NEW ENEMY PATH
+import plantsdefense.model.enemies.Enemy;
 import plantsdefense.util.SpriteLoader;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -11,6 +11,9 @@ public abstract class Projectile extends GameObject {
     protected int damage;
     protected Enemy target;
     protected int spriteRow, spriteCol;
+
+    // --- NEW: BIGGER AMMO (x2 size) ---
+    protected static final int DRAW_SIZE = 32;
 
     public Projectile(double x, double y, Enemy target, float speed, int damage, int spriteRow, int spriteCol) {
         super(x, y);
@@ -32,9 +35,10 @@ public abstract class Projectile extends GameObject {
     protected abstract void onHit(Enemy e);
 
     protected void checkCollision() {
+        // Simple circle collision
         if (target != null && target.isAlive()) {
             double dist = Math.hypot(target.getX() - x, target.getY() - y);
-            if (dist < 20) {
+            if (dist < 32) { // Increased hit radius slightly for bigger ammo
                 onHit(target);
                 kill();
             }
@@ -46,6 +50,9 @@ public abstract class Projectile extends GameObject {
     @Override
     public void render(Graphics2D g) {
         BufferedImage sprite = SpriteLoader.getSprite(spriteCol, spriteRow);
-        if (sprite != null) g.drawImage(sprite, (int)x - 8, (int)y - 8, 16, 16, null);
+        if (sprite != null) {
+            // Center the 32x32 ammo
+            g.drawImage(sprite, (int)x - 16, (int)y - 16, DRAW_SIZE, DRAW_SIZE, null);
+        }
     }
 }
