@@ -22,7 +22,7 @@ public class GameSession {
         currentPlayerName = playerName;
         currentMap = map;
         lives = 20;
-        gold = 500;
+        gold = 5000;
         wave = 0;
         score = 0; // Reset Score
         currentLevel = level;
