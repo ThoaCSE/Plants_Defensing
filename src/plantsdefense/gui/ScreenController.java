@@ -6,7 +6,7 @@ import plantsdefense.gui.editor.EditorPanel;
 import plantsdefense.gui.menu.MenuPanel;
 import plantsdefense.gui.menu.NewPlayerPanel;
 import plantsdefense.gui.menu.PlayPanel;
-import plantsdefense.jdbc.MapIO;
+import plantsdefense.jdbc.MapDB;
 import plantsdefense.model.Tile;
 
 import javax.swing.*;
@@ -61,7 +61,7 @@ public class ScreenController {
 
         // 2. Load Map
         if (filename != null) {
-            Tile[][] map = MapIO.loadMap(filename);
+            Tile[][] map = MapDB.loadMap(filename);
             if (map != null) {
                 String name = (GameSession.getPlayerName() == null) ? "Player" : GameSession.getPlayerName();
                 GameSession.startNewGame(name, map, levelIndex);
@@ -84,7 +84,7 @@ public class ScreenController {
             if (!mapName.endsWith(".txt")) mapName += ".txt";
 
             // 2. Load Map
-            Tile[][] map = MapIO.loadMap(mapName);
+            Tile[][] map = MapDB.loadMap(mapName);
             if (map != null) {
                 // 3. Start Game as Level 4 (Custom)
                 String name = (GameSession.getPlayerName() == null) ? "Player" : GameSession.getPlayerName();
