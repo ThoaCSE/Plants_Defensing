@@ -112,3 +112,4 @@ public class DatabaseInitializer {
             return null;
         }
     }
+}
