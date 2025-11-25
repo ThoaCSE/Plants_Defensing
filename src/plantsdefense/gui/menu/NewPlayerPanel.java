@@ -2,7 +2,7 @@ package plantsdefense.gui.menu;
 
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gui.ScreenController;
-import plantsdefense.jdbc.MapIO;
+import plantsdefense.jdbc.MapDB;
 
 import javax.swing.*;
 import java.awt.*;
@@ -58,8 +58,8 @@ public class NewPlayerPanel extends JPanel {
         }
 
         // --- FIXED: ADDED LEVEL 1 (int) TO THE ARGUMENTS ---
-        if (MapIO.loadMap("level1.txt") != null) {
-            GameSession.startNewGame(name, MapIO.loadMap("level1.txt"), 1); // <--- FIX IS HERE
+        if (MapDB.loadMap("level1.txt") != null) {
+            GameSession.startNewGame(name, MapDB.loadMap("level1.txt"), 1); // <--- FIX IS HERE
             controller.showPlay();
         } else {
             JOptionPane.showMessageDialog(this, "Could not load level1.txt", "Error", JOptionPane.ERROR_MESSAGE);
