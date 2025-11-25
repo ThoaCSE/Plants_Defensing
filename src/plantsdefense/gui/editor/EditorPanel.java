@@ -1,6 +1,7 @@
 package plantsdefense.gui.editor;
 
-import plantsdefense.jdbc.MapIO;
+import plantsdefense.gamelogic.GameSession;
+import plantsdefense.jdbc.MapDB;
 import plantsdefense.gui.ScreenController;
 import plantsdefense.model.Tile;
 import plantsdefense.util.Constants;
@@ -12,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
+import java.sql.SQLException;
 
 public class EditorPanel extends JPanel {
     private Tile[][] grid;
@@ -80,7 +82,7 @@ public class EditorPanel extends JPanel {
 
     private void loadDefaultMap() {
         try {
-            grid = MapIO.loadMap("level1.txt");
+            grid = MapDB.loadMap("level1.txt");
         } catch (Exception e) {
             grid = new Tile[Constants.rows][Constants.cols];
             for (int r = 0; r < Constants.rows; r++) {
@@ -285,17 +287,40 @@ public class EditorPanel extends JPanel {
 
     private void saveMap() {
         String name = JOptionPane.showInputDialog(this, "Save map as:", "level_0");
-        if (name != null && !name.trim().isEmpty()) {
-            if (!name.endsWith(".txt")) name += ".txt";
-            MapIO.saveMap(name.trim(), grid);
-            JOptionPane.showMessageDialog(this, "Saved: " + name);
+        if (name == null || name.trim().isEmpty()) {
+            return;
         }
+
+        if (!name.endsWith(".txt")) {
+            name += ".txt";
+        }
+
+        int creatorId = GameSession.getPlayerId();
+        if (creatorId == -1) {
+            creatorId = 0; // anonymous / system user
+        }
+
+        try {
+            MapDB.saveMap(name.trim(), grid, creatorId);
+            JOptionPane.showMessageDialog(this, "Map saved successfully: " + name,
+                    "Success", JOptionPane.INFORMATION_MESSAGE);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Failed to save map: " + ex.getMessage(),
+                    "Database Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Compatibility overload – allows calling without playerId
+    public static void saveMap(String filename, Tile[][] grid, int i) throws SQLException {
+        saveMap(filename, grid, 0); // 0 = anonymous creator
     }
 
     private void loadMap() {
         JFileChooser fc = new JFileChooser("res/levels/");
         if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            grid = MapIO.loadMap(fc.getSelectedFile().getName());
+            grid = MapDB.loadMap(fc.getSelectedFile().getName());
             repaint();
         }
     }
