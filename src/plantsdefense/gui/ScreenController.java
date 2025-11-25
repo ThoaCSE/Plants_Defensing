@@ -4,7 +4,6 @@ import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gamelogic.LevelManager;
 import plantsdefense.gui.editor.EditorPanel;
 import plantsdefense.gui.menu.MenuPanel;
-import plantsdefense.gui.menu.NewPlayerPanel;
 import plantsdefense.gui.menu.PlayPanel;
 import plantsdefense.jdbc.MapDB;
 import plantsdefense.model.Tile;
