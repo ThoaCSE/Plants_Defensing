@@ -1,7 +1,7 @@
 package plantsdefense.main;
 
 import plantsdefense.gui.GameFrame;
-import plantsdefense.jdbc.DatabaseInitializer;
+import plantsdefense.jdbc.DatabaseInitializer; //not initialized yet
 
 public class Main {
     public static void main(String[] args) {
