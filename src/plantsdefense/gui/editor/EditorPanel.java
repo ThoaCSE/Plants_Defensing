@@ -1,8 +1,8 @@
 package plantsdefense.gui.editor;
 
 import plantsdefense.gamelogic.GameSession;
-import plantsdefense.jdbc.MapDB;
 import plantsdefense.gui.ScreenController;
+import plantsdefense.jdbc.MapDB;
 import plantsdefense.model.Tile;
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
@@ -14,6 +14,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.sql.SQLException;
+import java.util.List;
 
 public class EditorPanel extends JPanel {
     private Tile[][] grid;
@@ -80,17 +81,43 @@ public class EditorPanel extends JPanel {
         });
     }
 
+    // Inside EditorPanel.java
     private void loadDefaultMap() {
-        try {
-            grid = MapDB.loadMap("level1.txt");
-        } catch (Exception e) {
-            grid = new Tile[Constants.rows][Constants.cols];
-            for (int r = 0; r < Constants.rows; r++) {
-                for (int c = 0; c < Constants.cols; c++) {
-                    grid[r][c] = new Tile(c, r, Constants.tile_grass);
+        // First try to load from database (recommended)
+        Tile[][] loaded = MapDB.loadMap("level1.txt");
+
+        if (loaded != null) {
+            grid = loaded;
+            System.out.println("Editor: Loaded default map from database (level1.txt)");
+        } else {
+            // Fallback: create a clean empty map manually (very rare case)
+            System.out.println("Editor: Database map not found → creating empty default grid");
+            grid = createDefaultGrid();
+        }
+
+        repaint();
+    }
+
+    // --- Hardcoded fallback grid (safe, clean, standard) ---
+    private Tile[][] createDefaultGrid() {
+        Tile[][] newGrid = new Tile[Constants.rows][Constants.cols];
+
+        for (int row = 0; row < Constants.rows; row++) {
+            for (int col = 0; col < Constants.cols; col++) {
+                int type = Constants.tile_grass; // Default = grass
+
+                // Optional: make a simple path for testing
+                if (row == 4) {
+                    type = Constants.tile_path;
+                    if (col == 0) type = Constants.tile_start;
+                    if (col == Constants.cols - 1) type = Constants.tile_end;
                 }
+
+                newGrid[row][col] = new Tile(col, row, type);
             }
         }
+
+        return newGrid;
     }
 
     private void handleClick(int mx, int my) {
@@ -285,6 +312,12 @@ public class EditorPanel extends JPanel {
         g2d.drawString(text, tx, y + 33);
     }
 
+    // Add this public method to EditorPanel class
+    public void setGrid(Tile[][] newGrid) {
+        this.grid = newGrid;
+        repaint();
+    }
+
     private void saveMap() {
         String name = JOptionPane.showInputDialog(this, "Save map as:", "level_0");
         if (name == null || name.trim().isEmpty()) {
@@ -297,31 +330,78 @@ public class EditorPanel extends JPanel {
 
         int creatorId = GameSession.getPlayerId();
         if (creatorId == -1) {
-            creatorId = 0; // anonymous / system user
+            creatorId = 0; // anonymous
         }
 
         try {
             MapDB.saveMap(name.trim(), grid, creatorId);
-            JOptionPane.showMessageDialog(this, "Map saved successfully: " + name,
+            JOptionPane.showMessageDialog(this,
+                    "Map saved successfully!\nName: " + name,
                     "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                    "Failed to save map: " + ex.getMessage(),
+                    "Failed to save map to database:\n" + ex.getMessage(),
                     "Database Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // Compatibility overload – allows calling without playerId
-    public static void saveMap(String filename, Tile[][] grid, int i) throws SQLException {
-        saveMap(filename, grid, 0); // 0 = anonymous creator
-    }
-
+    // src/plantsdefense/gui/editor/EditorPanel.java
     private void loadMap() {
-        JFileChooser fc = new JFileChooser("res/levels/");
-        if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            grid = MapDB.loadMap(fc.getSelectedFile().getName());
-            repaint();
+        // Get all maps from DB
+        List<String> allMaps = MapDB.listMaps();
+        if (allMaps.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No maps found in database!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
         }
+
+        // Create dialog with list of maps
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Load Map", true);
+        dialog.setSize(400, 400);
+        dialog.setLayout(new BorderLayout());
+        dialog.setLocationRelativeTo(this);
+
+        // List of maps
+        DefaultListModel<String> model = new DefaultListModel<>();
+        for (String mapName : allMaps) {
+            model.addElement(mapName);
+        }
+        JList<String> mapList = new JList<>(model);
+        mapList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        mapList.setSelectedIndex(0);  // Select first by default
+        JScrollPane scroll = new JScrollPane(mapList);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel();
+        JButton loadBtn = new JButton("LOAD");
+        JButton cancelBtn = new JButton("CANCEL");
+
+        loadBtn.addActionListener(e -> {
+            String selected = mapList.getSelectedValue();
+            if (selected != null) {
+                try {
+                    Tile[][] loadedGrid = MapDB.loadMap(selected);
+                    if (loadedGrid != null) {
+                        setGrid(loadedGrid);
+                        JOptionPane.showMessageDialog(dialog, "Loaded: " + selected, "Success", JOptionPane.INFORMATION_MESSAGE);
+                        dialog.dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(dialog, "Failed to load map data!", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(dialog, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        cancelBtn.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(loadBtn);
+        buttonPanel.add(cancelBtn);
+
+        dialog.add(scroll, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
     }
 }

@@ -1,3 +1,4 @@
+// src/plantsdefense/gamelogic/GameSession.java
 package plantsdefense.gamelogic;
 
 import plantsdefense.jdbc.PlayerDB;
@@ -21,6 +22,10 @@ public class GameSession {
         } catch (Exception e) { e.printStackTrace(); }
 
         GameState.set(GameState.State.PLAYING);
+    }
+
+    public static void removeGold(int amount) {
+        gold -= amount;
     }
 
     public static boolean loadSavedGame() {
@@ -65,8 +70,4 @@ public class GameSession {
     public static void addGold(int g) { gold += g; }
     public static void nextLevel() { currentLevel++; }
     public static boolean isGameOver() { return lives <= 0; }
-
-    public static void removeGold(int amount) {
-        gold -= amount;
-    }
 }
