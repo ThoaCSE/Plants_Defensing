@@ -1,3 +1,4 @@
+// src/plantsdefense/jdbc/DBConnection.java
 package plantsdefense.jdbc;
 
 import java.sql.Connection;
@@ -5,9 +6,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:mysql://127.0.0.1:3306/plantsdefensed?useSSL=false&serverTimezone=UTC";
+    private static final String URL = "jdbc:mysql://127.0.0.1:3306/plantsdefensed?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
     private static final String USER = "root";
-    private static final String PASS = "root1234";  // Your password
+    private static final String PASS = "root1234";
 
     private static Connection connection = null;
 
@@ -20,12 +21,7 @@ public class DBConnection {
 
     public static void closeConnection() {
         if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            try { connection.close(); } catch (SQLException e) { e.printStackTrace(); }
         }
     }
 }
-
