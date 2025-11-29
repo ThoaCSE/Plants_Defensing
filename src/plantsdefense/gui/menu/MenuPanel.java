@@ -1,6 +1,9 @@
+// src/plantsdefense/gui/menu/MenuPanel.java
 package plantsdefense.gui.menu;
 
 import plantsdefense.gui.ScreenController;
+import plantsdefense.jdbc.DBConnection;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -20,9 +23,15 @@ public class MenuPanel extends JPanel {
         add(title, gbc);
 
         addButton("NEW GAME", e -> controller.showNewPlayer(), gbc);
-        addButton("CONTINUE", e -> System.out.println("Continue clicked"), gbc);
+        addButton("CONTINUE", e -> controller.showLoadSave(), gbc);
+        addButton("LEADERBOARD", e -> controller.showLeaderboard(), gbc);
         addButton("MAP EDITOR", e -> controller.showEditor(), gbc);
-        addButton("QUIT", e -> System.exit(0), gbc);
+
+        // Closes connection before exiting
+        addButton("QUIT", e -> {
+            DBConnection.closeConnection();
+            System.exit(0);
+        }, gbc);
     }
 
     private void addButton(String text, java.awt.event.ActionListener action, GridBagConstraints gbc) {

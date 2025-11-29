@@ -9,12 +9,14 @@ public class GameSession {
     private static String currentPlayerName;
     private static int playerId = -1;
     private static Tile[][] currentMap;
+    private static String currentMapName = "level1.txt"; // ← NEW: Track actual map name
     private static int lives = 20, gold = 5000, wave = 0, score = 0, currentLevel = 1;
 
     public static void startNewGame(String playerName, Tile[][] map, int level) {
         currentPlayerName = playerName;
         currentMap = map;
         lives = 20; gold = 5000; wave = 0; score = 0; currentLevel = level;
+        currentMapName = LevelManager.getMapFile(level); // ← NEW: Set from LevelManager
 
         try {
             playerId = PlayerDB.getPlayerId(playerName);
@@ -24,8 +26,10 @@ public class GameSession {
         GameState.set(GameState.State.PLAYING);
     }
 
-    public static void removeGold(int amount) {
-        gold -= amount;
+    // ← NEW: For starting custom levels (call this in ScreenController or NewPlayerPanel)
+    public static void startCustomGame(String playerName, Tile[][] map, int level, String mapName) {
+        startNewGame(playerName, map, level); // Reuse base logic
+        currentMapName = mapName; // Override for custom
     }
 
     public static boolean loadSavedGame() {
@@ -40,7 +44,8 @@ public class GameSession {
                 gold = rs.getInt("gold");
                 lives = rs.getInt("lives");
                 score = rs.getInt("score");
-                currentMap = MapDB.loadMap(rs.getString("map_name"));
+                currentMapName = rs.getString("map_name"); // ← FIXED: Load real map name
+                currentMap = MapDB.loadMap(currentMapName);
                 if (currentMap != null) {
                     GameState.set(GameState.State.PLAYING);
                     return true;
@@ -49,6 +54,9 @@ public class GameSession {
         } catch (Exception e) { e.printStackTrace(); }
         return false;
     }
+
+    // ← NEW: Getter for map name
+    public static String getCurrentMapName() { return currentMapName; }
 
     // Getters
     public static int getPlayerId() { return playerId; }
@@ -60,7 +68,7 @@ public class GameSession {
     public static int getScore() { return score; }
     public static int getLevel() { return currentLevel; }
 
-    // Setters (add more as needed)
+    // Setters
     public static void setLives(int l) { lives = l; }
     public static void setGold(int g) { gold = g; }
     public static void setWave(int w) { wave = w; }
@@ -68,6 +76,7 @@ public class GameSession {
     public static void nextWave() { wave++; }
     public static void loseLife() { lives--; }
     public static void addGold(int g) { gold += g; }
+    public static void removeGold(int amount) { gold -= amount; } // From earlier
     public static void nextLevel() { currentLevel++; }
     public static boolean isGameOver() { return lives <= 0; }
 }

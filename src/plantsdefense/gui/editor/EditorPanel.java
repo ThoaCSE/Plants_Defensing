@@ -14,7 +14,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.sql.SQLException;
-import java.util.List;
 
 public class EditorPanel extends JPanel {
     private Tile[][] grid;
@@ -55,7 +54,6 @@ public class EditorPanel extends JPanel {
             }
             @Override
             public void mouseExited(MouseEvent e) {
-                // Reset hover when mouse leaves window
                 hoverX = -1;
                 hoverY = -1;
                 repaint();
@@ -65,7 +63,6 @@ public class EditorPanel extends JPanel {
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                // Update hover even while dragging
                 hoverX = e.getX();
                 hoverY = e.getY();
                 paintTileAt(e.getX(), e.getY());
@@ -73,7 +70,6 @@ public class EditorPanel extends JPanel {
             }
             @Override
             public void mouseMoved(MouseEvent e) {
-                // Track mouse for highlighting
                 hoverX = e.getX();
                 hoverY = e.getY();
                 repaint();
@@ -81,42 +77,31 @@ public class EditorPanel extends JPanel {
         });
     }
 
-    // Inside EditorPanel.java
     private void loadDefaultMap() {
-        // First try to load from database (recommended)
         Tile[][] loaded = MapDB.loadMap("level1.txt");
-
         if (loaded != null) {
             grid = loaded;
             System.out.println("Editor: Loaded default map from database (level1.txt)");
         } else {
-            // Fallback: create a clean empty map manually (very rare case)
-            System.out.println("Editor: Database map not found → creating empty default grid");
+            System.out.println("Editor: Creating empty default grid");
             grid = createDefaultGrid();
         }
-
         repaint();
     }
 
-    // --- Hardcoded fallback grid (safe, clean, standard) ---
     private Tile[][] createDefaultGrid() {
         Tile[][] newGrid = new Tile[Constants.rows][Constants.cols];
-
         for (int row = 0; row < Constants.rows; row++) {
             for (int col = 0; col < Constants.cols; col++) {
-                int type = Constants.tile_grass; // Default = grass
-
-                // Optional: make a simple path for testing
+                int type = Constants.tile_grass;
                 if (row == 4) {
                     type = Constants.tile_path;
                     if (col == 0) type = Constants.tile_start;
                     if (col == Constants.cols - 1) type = Constants.tile_end;
                 }
-
                 newGrid[row][col] = new Tile(col, row, type);
             }
         }
-
         return newGrid;
     }
 
@@ -125,20 +110,18 @@ public class EditorPanel extends JPanel {
         int h = getHeight();
         int sidebarX = w - 140;
 
-        // --- 1. MENU BUTTON (Top Right) ---
+        // 1. MENU BUTTON
         int menuBtnY = 20;
         if (mx >= sidebarX && mx <= sidebarX + BTN_W && my >= menuBtnY && my <= menuBtnY + BTN_H) {
             controller.showMenu();
             return;
         }
 
-        // --- 2. TOOLS (Tile Selector) ---
+        // 2. TOOLS
         int toolStartY = 120;
         for (int i = 0; i < 4; i++) {
             int iy = toolStartY + i * 80;
-            if (mx >= sidebarX && mx <= sidebarX + ICON_SIZE &&
-                    my >= iy && my <= iy + ICON_SIZE) {
-
+            if (mx >= sidebarX && mx <= sidebarX + ICON_SIZE && my >= iy && my <= iy + ICON_SIZE) {
                 int[] types = {Constants.tile_grass, Constants.tile_path, Constants.tile_start, Constants.tile_end};
                 selected_type = types[i];
                 repaint();
@@ -146,8 +129,7 @@ public class EditorPanel extends JPanel {
             }
         }
 
-        // --- 3. SAVE/LOAD BUTTONS (Bottom Right) ---
-        // FIXED: Logic now matches the paint coordinate (h - 65)
+        // 3. SAVE/LOAD BUTTONS
         int btnY = h - 65;
         int saveX = w - 260;
         int loadX = w - 140;
@@ -161,16 +143,14 @@ public class EditorPanel extends JPanel {
             return;
         }
 
-        // --- 4. MAP PAINTING ---
+        // 4. MAP PAINTING
         paintTileAt(mx, my);
     }
 
     private void paintTileAt(int mx, int my) {
         if (tileSize == 0) return;
-
         int gx = (mx - mapOffsetX) / tileSize;
         int gy = (my - mapOffsetY) / tileSize;
-
         if (gx >= 0 && gx < Constants.cols && gy >= 0 && gy < Constants.rows) {
             grid[gy][gx].setType(selected_type);
             repaint();
@@ -181,27 +161,28 @@ public class EditorPanel extends JPanel {
         return grid;
     }
 
+    public void setGrid(Tile[][] newGrid) {
+        this.grid = newGrid;
+        repaint();
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g.create();
-
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
         int panelW = getWidth();
         int panelH = getHeight();
 
-        // --- 1. CALCULATE LAYOUT ---
         tileSize = MAP_RENDER_SIZE / Constants.cols;
         int totalGridW = tileSize * Constants.cols;
         int totalGridH = tileSize * Constants.rows;
-
-        // Center map, offset for sidebar
-        mapOffsetX = (panelW - totalGridW) / 2 - (totalGridW/9);
+        mapOffsetX = (panelW - totalGridW) / 2 - (totalGridW / 9);
         mapOffsetY = (panelH - totalGridH) / 2;
 
-        // --- 2. DRAW MAP ---
+        // Draw map
         for (int r = 0; r < Constants.rows; r++) {
             for (int c = 0; c < Constants.cols; c++) {
                 Tile t = grid[r][c];
@@ -216,12 +197,10 @@ public class EditorPanel extends JPanel {
             }
         }
 
-        // Map Border
         g2d.setColor(new Color(255, 255, 255, 222));
         g2d.setStroke(new BasicStroke(4));
         g2d.drawRect(mapOffsetX, mapOffsetY, totalGridW, totalGridH);
 
-        // --- 3. DRAW UI SIDEBAR ---
         drawSidebar(g2d, panelW, panelH);
         g2d.dispose();
     }
@@ -229,13 +208,10 @@ public class EditorPanel extends JPanel {
     private void drawSidebar(Graphics2D g2d, int w, int h) {
         int sidebarX = w - 140;
 
-        // --- MENU BUTTON ---
-        int menuBtnY = 20;
-        // Red button normally, brighter if hovered
-        Color menuColor = new Color(200, 60, 60);
-        drawButton(g2d, "MENU", sidebarX, menuBtnY, menuColor);
+        // MENU BUTTON
+        drawButton(g2d, "MENU", sidebarX, 20, new Color(200, 60, 60));
 
-        // --- TOOLS ---
+        // TOOLS
         int toolStartY = 120;
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 16));
@@ -246,22 +222,17 @@ public class EditorPanel extends JPanel {
 
         for (int i = 0; i < 4; i++) {
             int y = toolStartY + i * 80;
-            int id = types[i];
-
-            BufferedImage icon = SpriteLoader.getSprite(id % Constants.atlas_cols, id / Constants.atlas_cols);
-
+            BufferedImage icon = SpriteLoader.getSprite(types[i] % Constants.atlas_cols, types[i] / Constants.atlas_cols);
             if (icon != null) {
                 g2d.drawImage(icon, sidebarX, y, ICON_SIZE, ICON_SIZE, null);
             }
 
-            // Highlight Selected Tile
             if (selected_type == types[i]) {
                 g2d.setColor(Color.YELLOW);
                 g2d.setStroke(new BasicStroke(4));
                 g2d.drawRoundRect(sidebarX - 5, y - 5, ICON_SIZE + 10, ICON_SIZE + 10, 15, 15);
                 g2d.setStroke(new BasicStroke(1));
             } else if (isHovering(sidebarX, y, ICON_SIZE, ICON_SIZE)) {
-                // Hover effect for tiles
                 g2d.setColor(new Color(255, 255, 255, 100));
                 g2d.drawRoundRect(sidebarX - 5, y - 5, ICON_SIZE + 10, ICON_SIZE + 10, 15, 15);
             }
@@ -271,40 +242,29 @@ public class EditorPanel extends JPanel {
             g2d.drawString(labels[i], sidebarX + ICON_SIZE + 10, y + 40);
         }
 
-        // --- SAVE / LOAD BUTTONS ---
+        // SAVE / LOAD BUTTONS
         int btnY = h - 65;
-        int saveX = w - 260;
-        int loadX = w - 140;
-
-        drawButton(g2d, "SAVE", saveX, btnY, new Color(0, 180, 0));
-        drawButton(g2d, "LOAD", loadX, btnY, new Color(0, 120, 255));
+        drawButton(g2d, "SAVE", w - 260, btnY, new Color(0, 180, 0));
+        drawButton(g2d, "LOAD", w - 140, btnY, new Color(0, 120, 255));
     }
 
-    // Helper to check if mouse is over an area
     private boolean isHovering(int x, int y, int w, int h) {
         return hoverX >= x && hoverX <= x + w && hoverY >= y && hoverY <= y + h;
     }
 
     private void drawButton(Graphics2D g2d, String text, int x, int y, Color color) {
         boolean hovered = isHovering(x, y, BTN_W, BTN_H);
+        if (hovered) color = color.brighter();
 
-        // If hovered, make color brighter
-        if (hovered) {
-            color = color.brighter();
-        }
-
-        // Button Body
         g2d.setColor(color);
         g2d.fillRoundRect(x, y, BTN_W, BTN_H, 25, 25);
 
-        // If hovered, add a yellow glow border
         if (hovered) {
             g2d.setColor(Color.YELLOW);
             g2d.setStroke(new BasicStroke(3));
             g2d.drawRoundRect(x, y, BTN_W, BTN_H, 25, 25);
         }
 
-        // Text
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 20));
         FontMetrics fm = g2d.getFontMetrics();
@@ -312,96 +272,50 @@ public class EditorPanel extends JPanel {
         g2d.drawString(text, tx, y + 33);
     }
 
-    // Add this public method to EditorPanel class
-    public void setGrid(Tile[][] newGrid) {
-        this.grid = newGrid;
-        repaint();
-    }
-
     private void saveMap() {
-        String name = JOptionPane.showInputDialog(this, "Save map as:", "level_0");
-        if (name == null || name.trim().isEmpty()) {
-            return;
-        }
-
-        if (!name.endsWith(".txt")) {
-            name += ".txt";
-        }
+        String name = JOptionPane.showInputDialog(this, "Save map as:", "my_map.txt");
+        if (name == null || name.trim().isEmpty()) return;
+        if (!name.endsWith(".txt")) name += ".txt";
 
         int creatorId = GameSession.getPlayerId();
-        if (creatorId == -1) {
-            creatorId = 0; // anonymous
-        }
+        if (creatorId == -1) creatorId = 0;
 
         try {
             MapDB.saveMap(name.trim(), grid, creatorId);
-            JOptionPane.showMessageDialog(this,
-                    "Map saved successfully!\nName: " + name,
-                    "Success", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Map saved: " + name, "Success", JOptionPane.INFORMATION_MESSAGE);
         } catch (SQLException ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Failed to save map to database:\n" + ex.getMessage(),
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Save failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    // src/plantsdefense/gui/editor/EditorPanel.java
+    // REPLACED WITH REUSABLE MAPLISTPANEL
     private void loadMap() {
-        // Get all maps from DB
-        List<String> allMaps = MapDB.listMaps();
-        if (allMaps.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No maps found in database!", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // Create dialog with list of maps
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Load Map", true);
-        dialog.setSize(400, 400);
-        dialog.setLayout(new BorderLayout());
+        dialog.setSize(500, 600);
         dialog.setLocationRelativeTo(this);
+        dialog.setResizable(false);
 
-        // List of maps
-        DefaultListModel<String> model = new DefaultListModel<>();
-        for (String mapName : allMaps) {
-            model.addElement(mapName);
-        }
-        JList<String> mapList = new JList<>(model);
-        mapList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        mapList.setSelectedIndex(0);  // Select first by default
-        JScrollPane scroll = new JScrollPane(mapList);
-
-        // Buttons
-        JPanel buttonPanel = new JPanel();
-        JButton loadBtn = new JButton("LOAD");
-        JButton cancelBtn = new JButton("CANCEL");
-
-        loadBtn.addActionListener(e -> {
-            String selected = mapList.getSelectedValue();
-            if (selected != null) {
-                try {
-                    Tile[][] loadedGrid = MapDB.loadMap(selected);
-                    if (loadedGrid != null) {
-                        setGrid(loadedGrid);
-                        JOptionPane.showMessageDialog(dialog, "Loaded: " + selected, "Success", JOptionPane.INFORMATION_MESSAGE);
-                        dialog.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(dialog, "Failed to load map data!", "Error", JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(dialog, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        MapListPanel panel = new MapListPanel(new MapListPanel.OnMapSelectedListener() {
+            @Override
+            public void onMapSelected(String mapName) {
+                Tile[][] loaded = MapDB.loadMap(mapName);
+                if (loaded != null) {
+                    setGrid(loaded);
+                    JOptionPane.showMessageDialog(dialog, "Loaded: " + mapName, "Success", JOptionPane.INFORMATION_MESSAGE);
+                    dialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Failed to load map!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
+            }
+
+            @Override
+            public void onBack() {
+                dialog.dispose();
             }
         });
 
-        cancelBtn.addActionListener(e -> dialog.dispose());
-
-        buttonPanel.add(loadBtn);
-        buttonPanel.add(cancelBtn);
-
-        dialog.add(scroll, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.add(panel);
         dialog.setVisible(true);
     }
 }

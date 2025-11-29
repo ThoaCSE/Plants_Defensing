@@ -11,7 +11,13 @@ public class PlayerDB {
             ps.setString(1, name);
             ps.executeUpdate();
             ResultSet rs = ps.getGeneratedKeys();
-            return rs.next() ? rs.getInt(1) : -1;
+            if (rs.next()) {
+                int newId = rs.getInt(1);
+                // Initialize default levels so they appear on leaderboard immediately
+                HighScoreDB.initializePlayerScores(newId);
+                return newId;
+            }
+            return -1;
         }
     }
 

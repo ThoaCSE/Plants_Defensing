@@ -1,11 +1,11 @@
+// src/plantsdefense/gui/ScreenController.java
 package plantsdefense.gui;
 
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gamelogic.LevelManager;
 import plantsdefense.gui.editor.EditorPanel;
-import plantsdefense.gui.menu.MenuPanel;
-import plantsdefense.gui.menu.NewPlayerPanel;
-import plantsdefense.gui.menu.PlayPanel;
+import plantsdefense.gui.editor.MapListPanel;
+import plantsdefense.gui.menu.*;
 import plantsdefense.jdbc.MapDB;
 import plantsdefense.model.Tile;
 
@@ -18,6 +18,8 @@ public class ScreenController {
 
     public static final String MENU = "MENU";
     public static final String NEW_PLAYER = "NEW_PLAYER";
+    public static final String LOAD_SAVE = "LOAD_SAVE"; // ← NEW
+    public static final String LEADERBOARD = "LEADERBOARD"; // ← NEW
     public static final String EDITOR = "EDITOR";
     public static final String PLAY = "PLAY";
 
@@ -44,6 +46,45 @@ public class ScreenController {
         layout.show(container, NEW_PLAYER);
     }
 
+    public void showCustomMapSelector() {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(container), "Custom Maps", true);
+        dialog.setSize(500, 600);
+        dialog.setLocationRelativeTo(container);
+        dialog.setResizable(false);
+
+        MapListPanel panel = new MapListPanel(new MapListPanel.OnMapSelectedListener() {
+            @Override
+            public void onMapSelected(String mapName) {
+                Tile[][] map = MapDB.loadMap(mapName);
+                if (map != null) {
+                    GameSession.startNewGame(GameSession.getPlayerName(), map, 4); // Level 4+ = custom
+                    showPlay();
+                    dialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Failed to load map!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+
+            @Override
+            public void onBack() {
+                dialog.dispose();
+                showMenu();
+            }
+        });
+
+        dialog.add(panel);
+        dialog.setVisible(true);
+    }
+    public void showLoadSave() {
+        ensurePanel(new LoadSavePanel(this), LOAD_SAVE);
+        layout.show(container, LOAD_SAVE);
+    }
+
+    public void showLeaderboard() {
+        ensurePanel(new LeaderboardPanel(this), LEADERBOARD);
+        layout.show(container, LEADERBOARD);
+    }
+
     public void showEditor() {
         if (playPanel != null) playPanel.stopGame();
         if (editorPanel == null) {
@@ -56,10 +97,7 @@ public class ScreenController {
     // --- LEVEL LOADING LOGIC ---
 
     public void loadLevel(int levelIndex) {
-        // 1. Get Filename from Manager
         String filename = LevelManager.getMapFile(levelIndex);
-
-        // 2. Load Map
         if (filename != null) {
             Tile[][] map = MapDB.loadMap(filename);
             if (map != null) {
@@ -70,23 +108,16 @@ public class ScreenController {
                 JOptionPane.showMessageDialog(container, "Error: Could not load " + filename);
                 showMenu();
             }
-        } else {
-            // Fallback if level index is weird
-            showMenu();
         }
     }
 
     public void playCustomLevel() {
-        // 1. Ask user for Map Name
-        String mapName = JOptionPane.showInputDialog(container, "Enter Map Name to Play:", "Load Custom Map", JOptionPane.QUESTION_MESSAGE);
-
+        String mapName = JOptionPane.showInputDialog(container, "Enter custom map name:");
         if (mapName != null && !mapName.trim().isEmpty()) {
             if (!mapName.endsWith(".txt")) mapName += ".txt";
 
-            // 2. Load Map
             Tile[][] map = MapDB.loadMap(mapName);
             if (map != null) {
-                // 3. Start Game as Level 4 (Custom)
                 String name = (GameSession.getPlayerName() == null) ? "Player" : GameSession.getPlayerName();
                 GameSession.startNewGame(name, map, 4);
                 showPlay();
@@ -103,20 +134,17 @@ public class ScreenController {
         if (current < max) {
             loadLevel(current + 1);
         } else {
-            // If we beat the last level, let user play custom
             playCustomLevel();
         }
     }
 
     public void retryLevel() {
-        // If playing custom (Level 4+), just restart current map
         if (GameSession.getLevel() > LevelManager.getMaxLevels()) {
             String name = GameSession.getPlayerName();
-            Tile[][] map = GameSession.getCurrentMap(); // Reuse current map in memory
+            Tile[][] map = GameSession.getCurrentMap();
             GameSession.startNewGame(name, map, GameSession.getLevel());
             showPlay();
         } else {
-            // Reload from file to be safe
             loadLevel(GameSession.getLevel());
         }
     }
@@ -131,7 +159,6 @@ public class ScreenController {
         layout.show(container, PLAY);
     }
 
-    // Helper for editor logic
     public Tile[][] getCurrentMapFromEditor() {
         if (editorPanel != null) return editorPanel.getCurrentGrid();
         return null;

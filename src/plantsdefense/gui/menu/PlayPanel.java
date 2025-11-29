@@ -1,9 +1,12 @@
+// src/plantsdefense/gui/menu/PlayPanel.java
 package plantsdefense.gui.menu;
 
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gamelogic.LevelManager;
 import plantsdefense.gamelogic.WaveManager;
 import plantsdefense.gui.ScreenController;
+import plantsdefense.jdbc.HighScoreDB;
+import plantsdefense.jdbc.SaveDB;
 import plantsdefense.model.GameObject;
 import plantsdefense.model.Tile;
 import plantsdefense.model.enemies.*;
@@ -32,8 +35,8 @@ public class PlayPanel extends JPanel {
     private boolean isGameOver = false;
     private boolean isVictory = false;
 
-    private Thread gameThread;
-    private javax.swing.Timer waveTimer;
+    private final Thread gameThread;
+    private final javax.swing.Timer waveTimer;
 
     private final List<ShopItem> shopItems = new ArrayList<>();
     private int selectedShopIndex = -1;
@@ -68,14 +71,11 @@ public class PlayPanel extends JPanel {
 
                 calculateLayoutDimensions();
 
-                // Right Click to Deselect (Cancel placing)
                 if (SwingUtilities.isRightMouseButton(e)) {
                     selectedShopIndex = -1;
                     return;
                 }
-
                 if (checkShopClick(e.getX(), e.getY())) return;
-
                 if (selectedShopIndex != -1 && hoveredGridX != -1 && hoveredGridY != -1) {
                     tryPlaceOrRemovePlant(hoveredGridX, hoveredGridY);
                 }
@@ -116,17 +116,13 @@ public class PlayPanel extends JPanel {
         shopItems.add(new ShopItem("Soldier", 50, 4, 1, 0));
         shopItems.add(new ShopItem("Tracker", 100, 5, 1, 1));
         shopItems.add(new ShopItem("Alchemist", 150, 6, 1, 2));
-        // --- NEW: REMOVE TOOL (ID = -1) ---
         shopItems.add(new ShopItem("Remove", 0, 0, 0, -1));
     }
 
     private void tryPlaceOrRemovePlant(int gx, int gy) {
         ShopItem item = shopItems.get(selectedShopIndex);
-
-        // --- CASE 1: REMOVE PLANT ---
         if (item.id == -1) {
             Plant found = null;
-            // Find plant at this location
             for (GameObject obj : gameObjects) {
                 if (obj instanceof Plant) {
                     double tileCX = gx * Constants.tile_size + 16;
@@ -139,15 +135,12 @@ public class PlayPanel extends JPanel {
             }
             if (found != null) {
                 gameObjects.remove(found);
-                GameSession.addGold(found.getCost()); // Refund
+                GameSession.addGold(found.getCost());
             }
-            return; // Don't deselect, allow multi-delete
+            return;
         }
 
-        // --- CASE 2: PLACE PLANT ---
         if (map[gy][gx].getType() != Constants.tile_grass) return;
-
-        // Check Occupancy
         for (GameObject obj : gameObjects) {
             if (obj instanceof Plant) {
                 double tileCX = gx * Constants.tile_size + 16;
@@ -155,19 +148,15 @@ public class PlayPanel extends JPanel {
                 if (Math.hypot(obj.getX() - tileCX, obj.getY() - tileCY) < 10) return;
             }
         }
-
         if (GameSession.getGold() >= item.cost) {
             GameSession.removeGold(item.cost);
-            Plant p = null;
-            switch (item.id) {
-                case 0: p = new SoldierPlant(gx, gy, gameObjects); break;
-                case 1: p = new TrackerPlant(gx, gy, gameObjects); break;
-                case 2: p = new AlchemistPlant(gx, gy, gameObjects); break;
-            }
+            Plant p = switch (item.id) {
+                case 0 -> new SoldierPlant(gx, gy, gameObjects);
+                case 1 -> new TrackerPlant(gx, gy, gameObjects);
+                case 2 -> new AlchemistPlant(gx, gy, gameObjects);
+                default -> null;
+            };
             if (p != null) gameObjects.add(p);
-
-            // --- NEW: MULTI-PLACE ---
-            // selectedShopIndex = -1; // Commented out to allow placing multiple
         }
     }
 
@@ -182,7 +171,6 @@ public class PlayPanel extends JPanel {
         int titleW = g.getFontMetrics().stringWidth(title);
         g.drawString(title, cx - titleW / 2, cy - 100);
 
-        // --- NEW: SHOW SCORE UNDER VICTORY ---
         if (isWin) {
             g.setColor(Color.WHITE);
             g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -191,18 +179,20 @@ public class PlayPanel extends JPanel {
             g.drawString(scoreText, cx - scoreW / 2, cy - 30);
         }
 
-        this.btnY = cy + 50; // Shifted down slightly
-        this.menuX = cx + 20;
-
-        if (isWin) {
-            this.nextLvlX = cx - BTN_W - 20;
-            String btnText = (GameSession.getLevel() >= LevelManager.getMaxLevels()) ? "LOAD MAP" : "NEXT LEVEL";
-            drawButton(g, btnText, nextLvlX, btnY);
+        this.btnY = cy + 80;
+        if (isWin && GameSession.getLevel() >= 3) {
+            this.retryX = cx - BTN_W - 50; this.menuX = cx + 50;
+            drawButton(g, "CUSTOM MAP", retryX, btnY);
+            drawButton(g, "MENU", menuX, btnY);
+        } else if (isWin) {
+            this.nextLvlX = cx - BTN_W - 50; this.menuX = cx + 50;
+            drawButton(g, "NEXT LEVEL", nextLvlX, btnY);
+            drawButton(g, "MENU", menuX, btnY);
         } else {
-            this.retryX = cx - BTN_W - 20;
+            this.retryX = cx - BTN_W - 50; this.menuX = cx + 50;
             drawButton(g, "RETRY", retryX, btnY);
+            drawButton(g, "MENU", menuX, btnY);
         }
-        drawButton(g, "MENU", menuX, btnY);
     }
 
     private void drawShopHUD(Graphics2D g) {
@@ -212,15 +202,12 @@ public class PlayPanel extends JPanel {
         g.drawRect(hudX, hudY, hudW, hudH);
         g.setFont(new Font("Arial", Font.BOLD, 18));
         g.drawString("DEFENDERS", hudX + 50, hudY + 30);
-
         int itemY = hudY + 50;
         for (int i = 0; i < shopItems.size(); i++) {
             ShopItem item = shopItems.get(i);
             boolean selected = (i == selectedShopIndex);
             g.setColor(selected ? new Color(80, 120, 80) : new Color(50, 50, 70));
             g.fillRect(hudX + 10, itemY, hudW - 20, 80);
-
-            // --- DRAW "X" IF REMOVE TOOL ---
             if (item.id == -1) {
                 g.setColor(Color.RED);
                 g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -231,7 +218,6 @@ public class PlayPanel extends JPanel {
             } else {
                 BufferedImage icon = SpriteLoader.getSprite(item.col, item.row);
                 if (icon != null) g.drawImage(icon, hudX + 20, itemY + 8, 64, 64, null);
-
                 g.setColor(Color.WHITE);
                 g.setFont(new Font("Arial", Font.BOLD, 14));
                 g.drawString(item.name, hudX + 90, itemY + 30);
@@ -242,10 +228,6 @@ public class PlayPanel extends JPanel {
         }
     }
 
-    // ... (Keep existing methods: calculateLayoutDimensions, stopGame, checkShopClick, gameLoop, updateGame, drawGameWorld, drawStats, drawButton, isInside, etc.) ...
-    // Note: Be sure to include the unchanged methods I omitted here for brevity if you are copy-pasting the whole file.
-
-    // --- OMITTED METHODS (STANDARD) ---
     private void calculateLayoutDimensions() {
         int panelW = getWidth() == 0 ? 1280 : getWidth();
         int panelH = getHeight() == 0 ? 1000 : getHeight();
@@ -259,6 +241,7 @@ public class PlayPanel extends JPanel {
         this.hudW = 220;
         this.hudH = 600;
     }
+
     private boolean checkShopClick(int mx, int my) {
         if (mx < hudX || mx > hudX + hudW || my < hudY || my > hudY + hudH) return false;
         int itemH = 80;
@@ -272,11 +255,13 @@ public class PlayPanel extends JPanel {
         }
         return false;
     }
+
     public void stopGame() {
         gameRunning = false;
         if (waveTimer != null) waveTimer.stop();
         if (gameThread != null) gameThread.interrupt();
     }
+
     private void gameLoop() {
         long lastTime = System.nanoTime();
         double ns = 1000000000 / 60.0;
@@ -289,31 +274,89 @@ public class PlayPanel extends JPanel {
             try { Thread.sleep(2); } catch (InterruptedException e) { break; }
         }
     }
+
     private void updateGame() {
         if (isGameOver || isVictory) return;
+
         waveManager.update();
         gameObjects.removeIf(obj -> !obj.isAlive());
         gameObjects.forEach(GameObject::update);
-        if (GameSession.getLives() <= 0) isGameOver = true;
-        if (waveManager.isLevelFinished()) {
-            if (!isVictory) {
+
+        // Determine correct Map Name string (e.g., "level1.txt")
+        String mapName;
+        if (GameSession.getLevel() <= 3) {
+            mapName = "level" + GameSession.getLevel() + ".txt";
+        } else {
+            // For custom maps, use the actual filename if available, or fallback
+            String custom = GameSession.getCurrentMapName();
+            mapName = (custom != null && !custom.isEmpty()) ? custom : "custom_map.txt";
+        }
+
+        // === GAME OVER ===
+        if (GameSession.getLives() <= 0 && !isGameOver) {
+            isGameOver = true;
+            gameRunning = false;
+            // Save Score (even if loss)
+            HighScoreDB.saveHighScore(GameSession.getPlayerId(), GameSession.getLevel(), mapName, GameSession.getScore());
+
+            SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(this, "GAME OVER\nFinal Score: " + GameSession.getScore(), "Defeat", JOptionPane.WARNING_MESSAGE);
+                controller.showMenu();
+            });
+        }
+
+        // === LEVEL COMPLETE ===
+        if (waveManager.isLevelFinished() && !isVictory) {
+            boolean noEnemiesLeft = gameObjects.stream().noneMatch(o -> o instanceof Enemy);
+            if (noEnemiesLeft) {
+                isVictory = true;
+                gameRunning = false;
                 int livesBonus = GameSession.getLives() * 100;
                 GameSession.addScore(livesBonus);
-                isVictory = true;
+                // Save Score on Win
+                HighScoreDB.saveHighScore(GameSession.getPlayerId(), GameSession.getLevel(), mapName, GameSession.getScore());
+
+                SwingUtilities.invokeLater(() -> {
+                    drawOverlay((Graphics2D) getGraphics(), "VICTORY!", Color.GREEN, true);
+                });
             }
         }
     }
+
     private void handleGameOverClick(int x, int y) {
-        if (isInside(x, y, retryX, btnY, BTN_W, BTN_H)) { stopGame(); controller.retryLevel(); }
-        else if (isInside(x, y, menuX, btnY, BTN_W, BTN_H)) { stopGame(); controller.showMenu(); }
-    }
-    private void handleVictoryClick(int x, int y) {
-        if (isInside(x, y, nextLvlX, btnY, BTN_W, BTN_H)) {
+        if (isInside(x, y, retryX, btnY, BTN_W, BTN_H)) {
             stopGame();
-            if (GameSession.getLevel() >= LevelManager.getMaxLevels()) controller.playCustomLevel();
-            else controller.nextLevel();
-        } else if (isInside(x, y, menuX, btnY, BTN_W, BTN_H)) { stopGame(); controller.showMenu(); }
+            controller.retryLevel();
+        } else if (isInside(x, y, menuX, btnY, BTN_W, BTN_H)) {
+            stopGame();
+            controller.showMenu();
+        }
     }
+
+    private void handleVictoryClick(int x, int y) {
+        if (GameSession.getLevel() >= 3 && isInside(x, y, retryX, btnY, BTN_W, BTN_H)) {
+            int save = JOptionPane.showConfirmDialog(this, "Save progress before playing custom map?", "Save?", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (save == JOptionPane.YES_OPTION) SaveDB.saveGame();
+            if (save != JOptionPane.CANCEL_OPTION) {
+                controller.showCustomMapSelector();
+            }
+            return;
+        }
+
+        if (isInside(x, y, nextLvlX, btnY, BTN_W, BTN_H)) {
+            SaveDB.saveGame();
+            GameSession.nextLevel();
+            controller.nextLevel();
+        } else if (isInside(x, y, menuX, btnY, BTN_W, BTN_H)) {
+            int choice = JOptionPane.showConfirmDialog(this, "Save your progress before returning to menu?", "Save Progress?", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (choice == JOptionPane.YES_OPTION) SaveDB.saveGame();
+            if (choice != JOptionPane.CANCEL_OPTION) {
+                stopGame();
+                controller.showMenu();
+            }
+        }
+    }
+
     @Override protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         calculateLayoutDimensions();
@@ -325,6 +368,7 @@ public class PlayPanel extends JPanel {
         if (isGameOver) drawOverlay(g2d, "GAME OVER", Color.RED, false);
         else if (isVictory) drawOverlay(g2d, "VICTORY!", Color.GREEN, true);
     }
+
     private void drawGameWorld(Graphics2D g2d) {
         AffineTransform old = g2d.getTransform();
         g2d.translate(mapOffsetX, mapOffsetY);
@@ -345,12 +389,11 @@ public class PlayPanel extends JPanel {
         g2d.setStroke(new BasicStroke(2));
         g2d.drawRect(mapOffsetX, mapOffsetY, renderedTileSize * Constants.cols, renderedTileSize * Constants.rows);
     }
+
     private void drawGhostPlant(Graphics2D g2d) {
         ShopItem item = shopItems.get(selectedShopIndex);
         int px = hoveredGridX * renderedTileSize;
         int py = hoveredGridY * renderedTileSize;
-
-        // Handle "Remove" tool ghost (Red box)
         if (item.id == -1) {
             g2d.setColor(new Color(255, 0, 0, 100));
             g2d.fillRect(px, py, renderedTileSize, renderedTileSize);
@@ -359,7 +402,6 @@ public class PlayPanel extends JPanel {
             g2d.drawRect(px, py, renderedTileSize, renderedTileSize);
             return;
         }
-
         int ghostSize = (int)(renderedTileSize * 1.5);
         int offset = (ghostSize - renderedTileSize) / 2;
         BufferedImage sprite = SpriteLoader.getSprite(item.col, item.row);
@@ -370,6 +412,7 @@ public class PlayPanel extends JPanel {
         g2d.setStroke(new BasicStroke(2));
         g2d.drawRect(px, py, renderedTileSize, renderedTileSize);
     }
+
     private void drawStats(Graphics2D g) {
         g.setFont(new Font("Arial", Font.BOLD, 20));
         g.setColor(Color.WHITE);
@@ -379,6 +422,7 @@ public class PlayPanel extends JPanel {
         g.drawString("Wave: " + GameSession.getWave(), 350, y);
         g.drawString("Score: " + GameSession.getScore(), 500, y);
     }
+
     private void drawButton(Graphics2D g, String text, int x, int y) {
         boolean hover = isInside(hoverBtnX, hoverBtnY, x, y, BTN_W, BTN_H);
         g.setColor(hover ? Color.YELLOW : Color.WHITE);
@@ -389,20 +433,18 @@ public class PlayPanel extends JPanel {
         g.setColor(Color.WHITE);
         g.setFont(new Font("Arial", Font.BOLD, 24));
         int tw = g.getFontMetrics().stringWidth(text);
-        g.drawString(text, x + (BTN_W - tw)/2, y + 35);
+        g.drawString(text, x + (BTN_W - tw) / 2, y + 35);
     }
+
     private boolean isInside(int mx, int my, int x, int y, int w, int h) {
         return mx >= x && mx <= x + w && my >= y && my <= y + h;
     }
+
     private static class ShopItem {
         String name;
         int cost, col, row, id;
         public ShopItem(String name, int cost, int col, int row, int id) {
-            this.name = name;
-            this.cost = cost;
-            this.col = col;
-            this.row = row;
-            this.id = id;
+            this.name = name; this.cost = cost; this.col = col; this.row = row; this.id = id;
         }
     }
 }
