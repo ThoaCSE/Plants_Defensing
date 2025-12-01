@@ -16,8 +16,7 @@ public class AlchemistPlant extends Plant {
         Enemy bestTarget = null;
         int bestPriority = -1;
         for (GameObject obj : objects) {
-            if (obj instanceof Enemy) {
-                Enemy e = (Enemy) obj;
+            if (obj instanceof Enemy e) {
                 if (isInRange(e)) {
                     int p = (e.getType() == EnemyType.Aerial) ? 3 : (e.getType() == EnemyType.Beast) ? 2 : 1;
                     if (p > bestPriority) { bestPriority = p; bestTarget = e; }

@@ -16,8 +16,7 @@ public class SoldierPlant extends Plant {
         Enemy closest = null;
         double minDst = Double.MAX_VALUE;
         for (GameObject obj : objects) {
-            if (obj instanceof Enemy) {
-                Enemy e = (Enemy) obj;
+            if (obj instanceof Enemy e) {
                 if (isInRange(e)) {
                     double dst = Math.hypot(e.getX() - x, e.getY() - y);
                     if (dst < minDst) { minDst = dst; closest = e; }

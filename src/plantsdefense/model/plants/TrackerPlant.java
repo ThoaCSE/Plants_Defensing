@@ -14,8 +14,7 @@ public class TrackerPlant extends Plant {
         Enemy best = null;
         float maxSpeed = -1;
         for (GameObject obj : objects) {
-            if (obj instanceof Enemy) {
-                Enemy e = (Enemy) obj;
+            if (obj instanceof Enemy e) {
                 if (isInRange(e) && e.getSpeed() > maxSpeed) {
                     maxSpeed = e.getSpeed(); best = e;
                 }

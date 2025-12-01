@@ -172,6 +172,43 @@ Notes and best practices:
 - For longer MP4 videos, host on YouTube/Vimeo and link via a thumbnail in the README rather than adding large video files to the repository.
 - If you decide to store MP4s or large GIFs in the repo, enable Git LFS and track `*.mp4` and `*.gif` to avoid bloating the repo history.
 
+**Media & Git LFS**
+
+- When a repository contains large media files (animated GIFs, MP4s), GitHub's push limits can block pushes or cause the repo to grow large. Use Git LFS to store large binary files outside the normal Git object store while keeping references in your repo.
+- Recommended file types to track with Git LFS for this project: `ref/vid/*.gif`, `ref/vid/*.mp4` and any other large video files.
+- Typical workflow on Windows (PowerShell): install Git LFS, enable it, add tracking patterns, commit the `.gitattributes` file, then migrate existing large files if needed.
+
+PowerShell commands (copy & paste):
+
+```powershell
+# install Git LFS (if not installed):
+#  - Download and run installer from https://git-lfs.github.com/ or install via package manager
+git lfs install
+
+# tell Git LFS which files to track (this creates/updates .gitattributes):
+git lfs track "ref/vid/*.gif"
+git lfs track "ref/vid/*.mp4"
+git lfs track "ref/pic/*.gif"
+
+# commit the .gitattributes file and the tracked files
+git add .gitattributes
+git add ref/vid/*.mp4 ref/vid/*.gif ref/pic/*.gif
+git commit -m "Track large media files with Git LFS"
+
+# NOTE: If large files were already committed in earlier commits, migrating history is required
+# to fully move them into LFS. This rewrites history and requires a force-push.
+# Only run the migrate command if you understand and accept rewriting the repo history.
+# Example (rewrites history and moves matching paths into LFS):
+git lfs migrate import --include="ref/vid/*.gif,ref/vid/*.mp4,ref/pic/*.gif"
+
+# After history rewrite: force-push to your remote (careful; this affects collaborators):
+git push --force origin HEAD:master
+```
+
+- If you prefer NOT to rewrite history, replace the large files in a new commit (for example by adding smaller MP4s or thumbnails), then push. The history will still contain the old blobs, so a one-time history migration is recommended to fully remove large blobs.
+
+- Alternative: host longer/high-resolution videos on YouTube/Vimeo and link via thumbnails to avoid adding heavy media to the repo.
+
 
 ---
 File updated: reformatted README into a report-style document.

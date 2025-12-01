@@ -10,7 +10,7 @@ import plantsdefense.jdbc.DBConnection;
 public class LoadSavePanel extends JPanel {
     private final ScreenController controller;
     private final DefaultListModel<String> listModel;
-    private  JList<String> playerList;
+    private final JList<String> playerList;
 
     public LoadSavePanel(ScreenController controller) {
         this.controller = controller;

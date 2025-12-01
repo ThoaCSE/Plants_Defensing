@@ -20,7 +20,7 @@ public class WaveManager {
     private long nextSpawnTime = 0;
 
     private final int[][] wavesConfig;
-    private int[] currentWaveLeft = new int[4];
+    private final int[] currentWaveLeft = new int[4];
 
     private final List<Point> spawnPoints = new ArrayList<>();
     private final List<Point> endPoints = new ArrayList<>();

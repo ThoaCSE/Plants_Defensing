@@ -5,7 +5,8 @@ import plantsdefense.model.enemies.EnemyType;
 import plantsdefense.model.plants.Projectile;
 
 public class SoldierProjectile extends Projectile {
-    private double dx, dy;
+    private final double dx;
+    private final double dy;
 
     public SoldierProjectile(double x, double y, Enemy target) {
         super(x, y, target, 5.0f, 20, 1, 9);
