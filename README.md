@@ -11,9 +11,9 @@
 
 ## Requirements
 
-- Java: Java 8 or newer (Java 11 recommended). Ensure `javac` and `java` are available on your `PATH`.
+- Java: Java 8 (required). Ensure `javac` and `java` (Java 8) are available on your `PATH`.
 - IDE (optional): IntelliJ IDEA or Eclipse for easy editing and running.
-- Libraries: If the project uses external jars, place them in `lib/` and include them on the classpath when compiling and running.
+- Libraries: This project can include external jars placed in `lib/`. If you add third-party jars, include them on the classpath when compiling/running. If you have specific jars, list them in this README or in `lib/`.
 
 ## Structure
 
@@ -57,6 +57,28 @@ Movement & logic:
 
 - `Pathfinder` (in `util`) handles pathfinding for enemies.
 - Sprite loading and animation use `Sprite` / `SpriteLoader` utilities.
+
+## Persistence (database)
+
+- `src/plantsdefense/jdbc/` contains helpers:
+	- `DBConnection` — database connection details (edit to point to your DB).
+	- `DatabaseInitializer` — creates tables.
+	- `HighScoreDB`, `SaveDB`, `MapDB`, `PlayerDB` — basic CRUD helpers.
+
+This project uses MySQL by default. To configure MySQL:
+
+- Add the MySQL JDBC driver (for example `mysql-connector-java.jar`) into `lib/` and include it on the classpath.
+- Edit `src/plantsdefense/jdbc/DBConnection.java` and set the connection URL, username, and password. Example:
+
+```java
+String url = "jdbc:mysql://localhost:3306/plants_defense_db?useSSL=false&serverTimezone=UTC";
+String user = "your_db_user";
+String pass = "your_db_password";
+```
+
+- Run `DatabaseInitializer` or start the application to auto-create tables if supported.
+
+If you prefer a file-based DB (SQLite/H2) swap the driver and connection string and add the driver jar to `lib/`.
 
 ## Conclusion
 
