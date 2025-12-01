@@ -123,3 +123,47 @@ _Win screen_
 
 ![Game over](ref/pic/Game_over.png)
 _Lose screen_
+
+### Animated demos (GIFs)
+
+![Alchemist plant effect](ref/vid/Alchemist_plant_effect.gif)
+_Alchemist plant effect_
+
+![Soldier plant effect](ref/vid/Soldier_plant_effect.gif)
+_Soldier plant effect_
+
+![Tracker plant effect](ref/vid/Tracker_plant_effect.gif)
+_Tracker plant effect_
+
+![Placing a defender](ref/vid/Placing.gif)
+_Placing a defender_
+
+![Removing a defender](ref/vid/Removing.gif)
+_Removing / selling_
+
+![Short gameplay loop](ref/vid/PlayGame.gif)
+_Short gameplay highlight_
+
+![Map editor demo](ref/vid/Map_Editor.gif)
+_Editor interaction_
+
+![Victory animation](ref/vid/Victory.gif)
+_Victory animation_
+
+![Game over animation](ref/vid/GameOver.gif)
+_Game over animation_
+
+![New game / intro](ref/vid/NewGame.gif)
+_New game / intro_
+
+![Next level](ref/vid/NextLevel.gif)
+_Next level transition_
+
+![Loading success](ref/vid/LoadingSuccess.gif)
+_Loading success_
+
+![Loading fail](ref/vid/LoadingFail.gif)
+_Loading fail_
+
+![Leaderboard demo](ref/vid/LeaderBoard.gif)
+_Leaderboard animation_
