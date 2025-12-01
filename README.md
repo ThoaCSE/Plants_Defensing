@@ -79,24 +79,49 @@ All example screenshots and short animated clips are available in the repository
 - Static screenshots: `ref/pic/`
 - Animated clips / short GIFs: `ref/vid/`
 
-Recommended files (already present):
 
-- `ref/pic/Menu.png` — Main menu
-- `ref/pic/New_player.png` — New player / registration
-- `ref/pic/Map_editor.png` — Map editor
-- `ref/pic/LeaderBoard.png` — Leaderboard panel
-- `ref/pic/Continue.png` — Continue / resume
-- `ref/pic/Playing.png` — In-game view
-- `ref/pic/Victory.png` — Win screen
-- `ref/pic/Game_over.png` — Lose screen
+Gallery (inline previews)
 
-Short animated interactions (GIFs):
+### Screenshots
 
-- `ref/vid/Placing.gif` — Placing a defender
-- `ref/vid/Removing.gif` — Removing/selling a defender
-- `ref/vid/PlayGame.gif` — Short gameplay loop
-- `ref/vid/Map_Editor.gif` — Editor interaction
-- `ref/vid/Victory.gif`, `ref/vid/GameOver.gif` — End states
+![Main menu](ref/pic/Menu.png)
+_Main menu_
+
+![New player](ref/pic/New_player.png)
+_New player / registration_
+
+![Map editor](ref/pic/Map_editor.png)
+_Map editor_
+
+![Playing](ref/pic/Playing.png)
+_In-game view_
+
+![Victory](ref/pic/Victory.png)
+_Win screen_
+
+![Game over](ref/pic/Game_over.png)
+_Lose screen_
+
+### Animated demos (GIFs)
+
+![Placing a defender](ref/vid/Placing.gif)
+_Placing a defender_
+
+![Removing a defender](ref/vid/Removing.gif)
+_Removing / selling_
+
+![Short gameplay loop](ref/vid/PlayGame.gif)
+_Short gameplay highlight_
+
+![Map editor demo](ref/vid/Map_Editor.gif)
+_Editor interaction_
+
+![Victory animation](ref/vid/Victory.gif)
+_Victory animation_
+
+![Game over animation](ref/vid/GameOver.gif)
+_Game over animation_
+
 
 How to embed in the `README.md` (examples):
 
