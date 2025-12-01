@@ -1,14 +1,12 @@
-// src/plantsdefense/gui/menu/LeaderboardPanel.java
 package plantsdefense.gui.menu;
 
-import plantsdefense.gui.ScreenController;
-import plantsdefense.jdbc.DBConnection;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import plantsdefense.gui.ScreenController;
+import plantsdefense.jdbc.DBConnection;
 
 public class LeaderboardPanel extends JPanel {
     private final ScreenController controller;
@@ -79,7 +77,6 @@ public class LeaderboardPanel extends JPanel {
                         "FROM high_scores h JOIN players p ON h.player_id = p.id " +
                         "WHERE h.level = ? ORDER BY h.score DESC LIMIT 10";
 
-        // Date formatter for nice output
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
         try (Connection conn = DBConnection.getConnection();

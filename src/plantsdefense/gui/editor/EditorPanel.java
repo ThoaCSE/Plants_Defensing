@@ -1,5 +1,12 @@
 package plantsdefense.gui.editor;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.image.BufferedImage;
+import java.sql.SQLException;
+import javax.swing.*;
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gui.ScreenController;
 import plantsdefense.jdbc.MapDB;
@@ -7,31 +14,20 @@ import plantsdefense.model.Tile;
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.image.BufferedImage;
-import java.sql.SQLException;
-
 public class EditorPanel extends JPanel {
     private Tile[][] grid;
     private int selected_type = Constants.tile_path;
     private final ScreenController controller;
 
-    // --- DYNAMIC LAYOUT FIELDS ---
     private int tileSize;
     private int mapOffsetX;
     private int mapOffsetY;
     private static final int MAP_RENDER_SIZE = 960;
 
-    // --- UI CONFIGURATION ---
     private static final int ICON_SIZE = 64;
     private static final int BTN_W = 110;
     private static final int BTN_H = 50;
 
-    // --- MOUSE STATE FOR HIGHLIGHTING ---
     private int hoverX = -1;
     private int hoverY = -1;
 
@@ -42,7 +38,6 @@ public class EditorPanel extends JPanel {
 
         loadDefaultMap();
 
-        // Mouse Listeners
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -110,14 +105,12 @@ public class EditorPanel extends JPanel {
         int h = getHeight();
         int sidebarX = w - 140;
 
-        // 1. MENU BUTTON
         int menuBtnY = 20;
         if (mx >= sidebarX && mx <= sidebarX + BTN_W && my >= menuBtnY && my <= menuBtnY + BTN_H) {
             controller.showMenu();
             return;
         }
 
-        // 2. TOOLS
         int toolStartY = 120;
         for (int i = 0; i < 4; i++) {
             int iy = toolStartY + i * 80;
@@ -129,7 +122,6 @@ public class EditorPanel extends JPanel {
             }
         }
 
-        // 3. SAVE/LOAD BUTTONS
         int btnY = h - 65;
         int saveX = w - 260;
         int loadX = w - 140;
@@ -143,7 +135,6 @@ public class EditorPanel extends JPanel {
             return;
         }
 
-        // 4. MAP PAINTING
         paintTileAt(mx, my);
     }
 
@@ -182,7 +173,6 @@ public class EditorPanel extends JPanel {
         mapOffsetX = (panelW - totalGridW) / 2 - (totalGridW / 9);
         mapOffsetY = (panelH - totalGridH) / 2;
 
-        // Draw map
         for (int r = 0; r < Constants.rows; r++) {
             for (int c = 0; c < Constants.cols; c++) {
                 Tile t = grid[r][c];
@@ -208,10 +198,8 @@ public class EditorPanel extends JPanel {
     private void drawSidebar(Graphics2D g2d, int w, int h) {
         int sidebarX = w - 140;
 
-        // MENU BUTTON
         drawButton(g2d, "MENU", sidebarX, 20, new Color(200, 60, 60));
 
-        // TOOLS
         int toolStartY = 120;
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 16));
@@ -242,7 +230,6 @@ public class EditorPanel extends JPanel {
             g2d.drawString(labels[i], sidebarX + ICON_SIZE + 10, y + 40);
         }
 
-        // SAVE / LOAD BUTTONS
         int btnY = h - 65;
         drawButton(g2d, "SAVE", w - 260, btnY, new Color(0, 180, 0));
         drawButton(g2d, "LOAD", w - 140, btnY, new Color(0, 120, 255));
@@ -289,7 +276,6 @@ public class EditorPanel extends JPanel {
         }
     }
 
-    // REPLACED WITH REUSABLE MAPLISTPANEL
     private void loadMap() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Load Map", true);
         dialog.setSize(500, 600);

@@ -1,4 +1,3 @@
-// src/plantsdefense/jdbc/HighScoreDB.java
 package plantsdefense.jdbc;
 
 import java.sql.*;
@@ -6,7 +5,6 @@ import java.sql.*;
 public class HighScoreDB {
 
     public static void saveHighScore(int playerId, int level, String mapName, int score) {
-        // ON DUPLICATE KEY UPDATE: detailed check to prevent duplicates
         String sql = """
             INSERT INTO high_scores (player_id, level, map_name, score)
             VALUES (?, ?, ?, ?)
@@ -27,11 +25,9 @@ public class HighScoreDB {
         }
     }
 
-    // Creates the "0" entries for level1.txt, level2.txt, etc.
     public static void initializePlayerScores(int playerId) {
         try {
             for (int i = 1; i <= 3; i++) {
-                // Now uses "levelX.txt" format as requested
                 saveHighScore(playerId, i, "level" + i + ".txt", 0);
             }
         } catch (Exception e) {

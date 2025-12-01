@@ -1,16 +1,13 @@
-// src/plantsdefense/jdbc/MapDB.java
 package plantsdefense.jdbc;
-
-import plantsdefense.model.Tile;
-import plantsdefense.util.Constants;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import plantsdefense.model.Tile;
+import plantsdefense.util.Constants;
 
 public class MapDB {
 
-    // MAIN: Load map by name
     public static Tile[][] loadMap(String mapName) {
         String sql = "SELECT data FROM maps WHERE name = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -26,12 +23,10 @@ public class MapDB {
         return null;
     }
 
-    // MAIN: Save map with playerId (handles invalid IDs safely)
     public static void saveMap(String filename, Tile[][] grid, int playerId) throws SQLException {
         String data = serializeGrid(grid);
         String safeName = filename.endsWith(".txt") ? filename : filename + ".txt";
 
-        // Choose correct SQL based on whether we have a valid player
         String sql;
         if (playerId > 0) {
             sql = "INSERT INTO maps (name, data, created_by) VALUES (?, ?, ?) " +
@@ -52,12 +47,10 @@ public class MapDB {
         }
     }
 
-    // OVERLOAD: For old calls or when no player is logged in
     public static void saveMap(String filename, Tile[][] grid) throws SQLException {
-        saveMap(filename, grid, 0); // 0 → treated as anonymous → created_by = NULL
+        saveMap(filename, grid, 0);
     }
 
-    // List all maps (for editor/load menu)
     public static List<String> listMaps() {
         List<String> names = new ArrayList<>();
         String sql = "SELECT name FROM maps ORDER BY created_at DESC";
@@ -73,7 +66,6 @@ public class MapDB {
         return names;
     }
 
-    // Helper: Convert Tile[][] → CSV string
     private static String serializeGrid(Tile[][] grid) {
         StringBuilder sb = new StringBuilder();
         for (int r = 0; r < Constants.rows; r++) {
@@ -86,7 +78,6 @@ public class MapDB {
         return sb.toString();
     }
 
-    // Helper: Convert CSV string → Tile[][]
     private static Tile[][] parseMapData(String data) {
         Tile[][] grid = new Tile[Constants.rows][Constants.cols];
         String[] lines = data.split("\n");

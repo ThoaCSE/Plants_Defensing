@@ -1,4 +1,3 @@
-// src/plantsdefense/jdbc/DBConnection.java
 package plantsdefense.jdbc;
 
 import java.sql.Connection;

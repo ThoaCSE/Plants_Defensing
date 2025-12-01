@@ -1,11 +1,9 @@
-// src/plantsdefense/gui/editor/MapListPanel.java
 package plantsdefense.gui.editor;
 
-import plantsdefense.jdbc.MapDB;
-
-import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import javax.swing.*;
+import plantsdefense.jdbc.MapDB;
 
 public class MapListPanel extends JPanel {
     private final JList<String> mapList;

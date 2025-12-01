@@ -1,13 +1,12 @@
 package plantsdefense.model.enemies;
 
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.util.List;
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.model.GameObject;
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
-
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.List;
 
 public abstract class Enemy extends GameObject {
     protected float speed;
@@ -89,16 +88,15 @@ public abstract class Enemy extends GameObject {
         }
     }
 
-    // --- UPDATED: Returns TRUE if enemy died ---
     public boolean takeDamage(int damage) {
         health -= damage;
         if (health <= 0) {
             GameSession.addGold(rewardGold);
             GameSession.addScore(scoreValue);
             kill();
-            return true; // Returns TRUE if enemy died
+            return true;
         }
-        return false; // Returns FALSE if enemy survived
+        return false;
     }
 
     public void applySlow(int durationFrames) {

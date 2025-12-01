@@ -1,31 +1,27 @@
 package plantsdefense.gamelogic;
 
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import plantsdefense.model.GameObject;
 import plantsdefense.model.Tile;
 import plantsdefense.model.enemies.*;
 import plantsdefense.util.Constants;
 import plantsdefense.util.Pathfinder;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 public class WaveManager {
     private final List<GameObject> gameObjects;
     private final Tile[][] map;
 
-    // Wave State
     private boolean waveActive = false;
     private int enemiesSpawned = 0;
     private int enemiesToSpawnTotal = 0;
     private long nextSpawnTime = 0;
 
-    // Config
     private final int[][] wavesConfig;
     private int[] currentWaveLeft = new int[4];
 
-    // Pathing Cache
     private final List<Point> spawnPoints = new ArrayList<>();
     private final List<Point> endPoints = new ArrayList<>();
     private final Random random = new Random();
@@ -35,7 +31,6 @@ public class WaveManager {
         this.map = map;
         this.wavesConfig = wavesConfig;
 
-        // 1. Pre-scan the map for ALL start and end points
         findPathPoints();
     }
 
@@ -54,7 +49,6 @@ public class WaveManager {
             }
         }
 
-        // Debug check
         if (spawnPoints.isEmpty()) System.out.println("WARNING: No Start Tiles found!");
         if (endPoints.isEmpty()) System.out.println("WARNING: No End Tiles found!");
     }
@@ -109,18 +103,15 @@ public class WaveManager {
     private void spawnNextEnemy() {
         if (spawnPoints.isEmpty() || endPoints.isEmpty()) return;
 
-        // 2. Randomly pick one of the Start Points
         Point start = spawnPoints.get(random.nextInt(spawnPoints.size()));
 
-        // 3. Find a path to ANY reachable end point
-        // (Usually there is just 1 end, but if you have split lanes, this checks all)
         List<Point> path = null;
 
         for (Point end : endPoints) {
             List<Point> testPath = Pathfinder.findPath(map, start, end);
             if (testPath != null && !testPath.isEmpty()) {
                 path = testPath;
-                break; // Found a valid path!
+                break;
             }
         }
 

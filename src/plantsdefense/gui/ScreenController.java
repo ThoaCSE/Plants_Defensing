@@ -1,6 +1,7 @@
-// src/plantsdefense/gui/ScreenController.java
 package plantsdefense.gui;
 
+import java.awt.*;
+import javax.swing.*;
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gamelogic.LevelManager;
 import plantsdefense.gui.editor.EditorPanel;
@@ -9,17 +10,14 @@ import plantsdefense.gui.menu.*;
 import plantsdefense.jdbc.MapDB;
 import plantsdefense.model.Tile;
 
-import javax.swing.*;
-import java.awt.*;
-
 public class ScreenController {
     private final JPanel container;
     private final CardLayout layout;
 
     public static final String MENU = "MENU";
     public static final String NEW_PLAYER = "NEW_PLAYER";
-    public static final String LOAD_SAVE = "LOAD_SAVE"; // ← NEW
-    public static final String LEADERBOARD = "LEADERBOARD"; // ← NEW
+    public static final String LOAD_SAVE = "LOAD_SAVE";
+    public static final String LEADERBOARD = "LEADERBOARD";
     public static final String EDITOR = "EDITOR";
     public static final String PLAY = "PLAY";
 
@@ -57,7 +55,7 @@ public class ScreenController {
             public void onMapSelected(String mapName) {
                 Tile[][] map = MapDB.loadMap(mapName);
                 if (map != null) {
-                    GameSession.startNewGame(GameSession.getPlayerName(), map, 4); // Level 4+ = custom
+                    GameSession.startNewGame(GameSession.getPlayerName(), map, 4);
                     showPlay();
                     dialog.dispose();
                 } else {
@@ -93,8 +91,6 @@ public class ScreenController {
         }
         layout.show(container, EDITOR);
     }
-
-    // --- LEVEL LOADING LOGIC ---
 
     public void loadLevel(int levelIndex) {
         String filename = LevelManager.getMapFile(levelIndex);

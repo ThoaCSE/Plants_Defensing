@@ -1,6 +1,15 @@
-// src/plantsdefense/gui/menu/PlayPanel.java
 package plantsdefense.gui.menu;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import javax.swing.*;
 import plantsdefense.gamelogic.GameSession;
 import plantsdefense.gamelogic.LevelManager;
 import plantsdefense.gamelogic.WaveManager;
@@ -13,17 +22,6 @@ import plantsdefense.model.enemies.*;
 import plantsdefense.model.plants.*;
 import plantsdefense.util.Constants;
 import plantsdefense.util.SpriteLoader;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class PlayPanel extends JPanel {
     private final Tile[][] map;
@@ -282,21 +280,17 @@ public class PlayPanel extends JPanel {
         gameObjects.removeIf(obj -> !obj.isAlive());
         gameObjects.forEach(GameObject::update);
 
-        // Determine correct Map Name string (e.g., "level1.txt")
         String mapName;
         if (GameSession.getLevel() <= 3) {
             mapName = "level" + GameSession.getLevel() + ".txt";
         } else {
-            // For custom maps, use the actual filename if available, or fallback
             String custom = GameSession.getCurrentMapName();
             mapName = (custom != null && !custom.isEmpty()) ? custom : "custom_map.txt";
         }
 
-        // === GAME OVER ===
         if (GameSession.getLives() <= 0 && !isGameOver) {
             isGameOver = true;
             gameRunning = false;
-            // Save Score (even if loss)
             HighScoreDB.saveHighScore(GameSession.getPlayerId(), GameSession.getLevel(), mapName, GameSession.getScore());
 
             SwingUtilities.invokeLater(() -> {
@@ -305,7 +299,6 @@ public class PlayPanel extends JPanel {
             });
         }
 
-        // === LEVEL COMPLETE ===
         if (waveManager.isLevelFinished() && !isVictory) {
             boolean noEnemiesLeft = gameObjects.stream().noneMatch(o -> o instanceof Enemy);
             if (noEnemiesLeft) {
@@ -313,7 +306,6 @@ public class PlayPanel extends JPanel {
                 gameRunning = false;
                 int livesBonus = GameSession.getLives() * 100;
                 GameSession.addScore(livesBonus);
-                // Save Score on Win
                 HighScoreDB.saveHighScore(GameSession.getPlayerId(), GameSession.getLevel(), mapName, GameSession.getScore());
 
                 SwingUtilities.invokeLater(() -> {

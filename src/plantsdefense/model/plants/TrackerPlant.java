@@ -1,13 +1,12 @@
 package plantsdefense.model.plants;
 
+import java.util.List;
 import plantsdefense.model.GameObject;
 import plantsdefense.model.enemies.Enemy;
 import plantsdefense.model.plants.shoot.TrackerProjectile;
-import java.util.List;
 
 public class TrackerPlant extends Plant {
     public TrackerPlant(int gridX, int gridY, List<GameObject> objects) {
-        // Cost: 100
         super(gridX, gridY, 200, 15, 40, 100, 1, 5, objects);
     }
     @Override

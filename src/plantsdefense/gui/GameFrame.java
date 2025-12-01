@@ -1,7 +1,7 @@
 package plantsdefense.gui;
 
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 public class GameFrame extends JFrame {
     private final CardLayout cardLayout = new CardLayout();
@@ -18,7 +18,6 @@ public class GameFrame extends JFrame {
         screenController = new ScreenController(mainPanel, cardLayout);
         add(mainPanel);
 
-        // Start with Menu
         screenController.showMenu();
 
         setVisible(true);

@@ -1,8 +1,7 @@
-// src/plantsdefense/jdbc/SaveDB.java
 package plantsdefense.jdbc;
 
-import plantsdefense.gamelogic.GameSession;
 import java.sql.*;
+import plantsdefense.gamelogic.GameSession;
 
 public class SaveDB {
 
@@ -29,12 +28,11 @@ public class SaveDB {
             ps.setInt(4, GameSession.getGold());
             ps.setInt(5, GameSession.getLives());
             ps.setInt(6, GameSession.getScore());
-            ps.setString(7, ""); // Placeholder for detailed plant data
+            ps.setString(7, "");
             ps.setString(8, currentMap);
 
             ps.executeUpdate();
 
-            // FIX: Pass 'currentMap' as the 3rd argument
             HighScoreDB.saveHighScore(playerId, GameSession.getLevel(), currentMap, GameSession.getScore());
 
             PlayerDB.updateProgress(playerId, GameSession.getLevel(), GameSession.getScore());

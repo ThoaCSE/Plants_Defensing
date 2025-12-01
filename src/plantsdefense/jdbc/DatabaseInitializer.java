@@ -1,4 +1,3 @@
-// src/plantsdefense/jdbc/DatabaseInitializer.java
 package plantsdefense.jdbc;
 
 import java.io.BufferedReader;

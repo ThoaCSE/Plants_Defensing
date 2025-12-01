@@ -1,4 +1,3 @@
-// src/plantsdefense/jdbc/PlayerDB.java
 package plantsdefense.jdbc;
 
 import java.sql.*;
@@ -13,7 +12,6 @@ public class PlayerDB {
             ResultSet rs = ps.getGeneratedKeys();
             if (rs.next()) {
                 int newId = rs.getInt(1);
-                // Initialize default levels so they appear on leaderboard immediately
                 HighScoreDB.initializePlayerScores(newId);
                 return newId;
             }

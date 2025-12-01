@@ -1,11 +1,9 @@
-// src/plantsdefense/gui/menu/MenuPanel.java
 package plantsdefense.gui.menu;
 
+import java.awt.*;
+import javax.swing.*;
 import plantsdefense.gui.ScreenController;
 import plantsdefense.jdbc.DBConnection;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class MenuPanel extends JPanel {
     public MenuPanel(ScreenController controller) {

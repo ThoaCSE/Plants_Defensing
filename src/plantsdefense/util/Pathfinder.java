@@ -1,9 +1,8 @@
 package plantsdefense.util;
 
-import plantsdefense.model.Tile;
-
 import java.awt.Point;
 import java.util.*;
+import plantsdefense.model.Tile;
 
 public class Pathfinder {
 
@@ -38,7 +37,7 @@ public class Pathfinder {
                 }
             }
         }
-        return List.of(); // No path
+        return List.of();
     }
 
     private static List<Point> reconstructPath(Node node) {
@@ -64,7 +63,6 @@ public class Pathfinder {
 
             if (nx >= 0 && nx < Constants.cols && ny >= 0 && ny < Constants.rows) {
                 int type = grid[ny][nx].getType();
-                // ONLY allow movement on path (8), start (27), end (28)
                 if (type == Constants.tile_path || type == Constants.tile_start || type == Constants.tile_end) {
                     neighbors.add(new Point(nx, ny));
                 }

@@ -1,10 +1,10 @@
 package plantsdefense.model.plants;
 
+import java.util.List;
 import plantsdefense.model.GameObject;
 import plantsdefense.model.enemies.Enemy;
 import plantsdefense.model.enemies.EnemyType;
 import plantsdefense.model.plants.shoot.*;
-import java.util.List;
 
 public class AlchemistPlant extends Plant {
     public AlchemistPlant(int gridX, int gridY, List<GameObject> objects) {
@@ -13,7 +13,6 @@ public class AlchemistPlant extends Plant {
     }
     @Override
     protected Enemy findTarget() {
-        // (Priority logic remains the same as previous step)
         Enemy bestTarget = null;
         int bestPriority = -1;
         for (GameObject obj : objects) {

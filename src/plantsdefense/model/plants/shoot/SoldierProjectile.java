@@ -23,13 +23,10 @@ public class SoldierProjectile extends Projectile {
 
     @Override
     protected void onHit(Enemy e) {
-        if (e.getType() == EnemyType.Aerial) return; // Miss Bats
+        if (e.getType() == EnemyType.Aerial) return;
 
         e.takeDamage(damage);
 
-        // --- NEW LOGIC: KNOCKBACK ONLY IF ALIVE ---
-        // If the enemy survives the damage, we push them back.
-        // If they died from the damage, they just die (no push).
         if (e.isAlive()) {
             e.knockBack(3);
         }
