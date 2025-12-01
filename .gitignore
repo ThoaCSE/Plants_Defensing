@@ -28,3 +28,7 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+# Local tools and backups
+/tools/
+/ref/vid/backup/
